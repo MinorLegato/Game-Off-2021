@@ -1,10 +1,7 @@
 #include "ats.h"
-#include <stdio.h>
 
 int main(void) {
     initPlatform("Game Off 2021", 800, 600);
-
-    puts((char*)glGetString(GL_VERSION));
 
     auto pos = v2(0, 0);
 
@@ -25,11 +22,15 @@ int main(void) {
 
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glUniform3f(0, 1, 2, 3);
+
+#if 0
         glBegin(GL_TRIANGLES);
         glColor3f(1, 0, 0); glVertex3f(pos.x + 0, pos.y + 1, 0);
         glColor3f(0, 1, 0); glVertex3f(pos.x - 1, pos.y - 1, 0);
         glColor3f(0, 0, 1); glVertex3f(pos.x + 1, pos.y - 1, 0);
         glEnd();
+#endif
 
         updatePlatform();
     }

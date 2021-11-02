@@ -1,6 +1,6 @@
 #pragma once
 
-//#define WIN32_MEAN_AND_LEAN
+#define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 #include <GL/gl.h>
 #include "ext/wglext.h"
@@ -8,6 +8,7 @@
 #include <math.h>
 
 #define PI (3.14159265359f)
+#define GLSL_SHADER(shader) "#version 330 core\n" #shader
 
 // ================================================ TYPES =========================================== //
 
@@ -513,6 +514,11 @@ static struct {
     } keyboard;
 
     struct {
+        HANDLE output;
+        HANDLE input;
+    } console;
+
+    struct {
         f32 total;
         f32 delta;
     } time;
@@ -560,6 +566,12 @@ static LRESULT win32_windowProc(HWND window, UINT message, WPARAM wparam, LPARAM
     GLProc(LinkProgram, LINKPROGRAM) \
     GLProc(DeleteShader, DELETESHADER) \
     GLProc(UseProgram, USEPROGRAM) \
+    GLProc(GetUniformLocation, GETUNIFORMLOCATION) \
+    GLProc(Uniform1i, UNIFORM1I) \
+    GLProc(Uniform1F, UNIFORM1F) \
+    GLProc(Uniform2f, UNIFORM2F) \
+    GLProc(Uniform3f, UNIFORM3F) \
+    GLProc(Uniform4f, UNIFORM4F) \
     GLProc(GetProgramiv, GETPROGRAMIV) \
     GLProc(GetShaderiv, GETSHADERIV) \
     GLProc(GetShaderInfoLog, GETSHADERINFOLOG) \
@@ -601,29 +613,29 @@ static void initOpenGL(void) {
         wglSwapIntervalEXT         = (PFNWGLSWAPINTERVALEXTPROC)         wglGetProcAddress("wglSwapIntervalEXT");
 
         {
-            int pf_attribs_i[] = {
+            int attribs[] = {
                 WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
                 WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-                WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-                WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
-                WGL_COLOR_BITS_ARB, 32,
-                WGL_DEPTH_BITS_ARB, 24,
-                WGL_STENCIL_BITS_ARB, 8,
+                WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
+                WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
+                WGL_COLOR_BITS_ARB,     32,
+                WGL_DEPTH_BITS_ARB,     24,
+                WGL_STENCIL_BITS_ARB,   8,
                 0
             };
 
             UINT num_formats = 0;
-            wglChoosePixelFormatARB(platform.window.hdc, pf_attribs_i, 0, 1, &pixel_format, &num_formats);
+            wglChoosePixelFormatARB(platform.window.hdc, attribs, 0, 1, &pixel_format, &num_formats);
         }
 
         if (pixel_format) {
-            const int context_attribs[] = {
+            const int attribs[] = {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
                 WGL_CONTEXT_MINOR_VERSION_ARB, 3,
                 0
             };
 
-            platform.window.hrc = wglCreateContextAttribsARB(platform.window.hdc, dummy_hrc, context_attribs);
+            platform.window.hrc = wglCreateContextAttribsARB(platform.window.hdc, dummy_hrc, attribs);
 
             if (platform.window.hrc) {
                 wglMakeCurrent(platform.window.hdc, 0);
@@ -645,6 +657,9 @@ static void initOpenGL(void) {
 static void initPlatform(const char* title, i32 width, i32 height) {
     platform.window.width  = width;
     platform.window.height = height;
+
+    platform.console.input = GetStdHandle(STD_INPUT_HANDLE);
+    platform.console.output = GetStdHandle(STD_OUTPUT_HANDLE);
 
     auto instance = GetModuleHandleA(NULL);
 
@@ -733,9 +748,10 @@ static u32 gl_compileShader(const char* source, unsigned int type) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
     if (!success) {
-        glGetShaderInfoLog(shader, 512, NULL, info_log);
-        //puts(info_log);
-        //exit(EXIT_FAILURE);
+        GLsizei len = 0;
+        glGetShaderInfoLog(shader, 512, &len, info_log);
+        WriteConsole(platform.console.output, info_log, len, NULL, NULL);
+        exitPlatform();
     }
 
     return shader;
@@ -755,9 +771,10 @@ static u32 gl_linkShader(u32 vertex_shader, u32 fragment_shader) {
     glGetProgramiv(shader, GL_LINK_STATUS, &success);
 
     if (!success) {
-        glGetProgramInfoLog(shader, 512, NULL, info_log);
-        //puts(info_log);
-        //exit(EXIT_FAILURE);
+        GLsizei len = 0;
+        glGetProgramInfoLog(shader, 512, &len, info_log);
+        WriteConsole(platform.console.output, info_log, len, NULL, NULL);
+        exitPlatform();
     }
 
     return shader;
