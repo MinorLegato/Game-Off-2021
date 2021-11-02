@@ -502,7 +502,7 @@ static struct {
         i32     height;
         f32     aspect_ratio;
 
-        HWND    handle;
+        HWND    hwnd;
         HDC     hdc;
         HGLRC   hrc;
     } window;
@@ -598,60 +598,59 @@ static void initOpenGL(void) {
     pfd.cStencilBits   = 8;
     pfd.iLayerType     = PFD_MAIN_PLANE;
 
-    platform.window.hdc = GetDC(platform.window.handle);
+    platform.window.hdc = GetDC(platform.window.hwnd);
     auto pixel_format = ChoosePixelFormat(platform.window.hdc, &pfd);
 
+    SetPixelFormat(platform.window.hdc, pixel_format, &pfd);
+    platform.window.hrc = wglCreateContext(platform.window.hdc);
+    wglMakeCurrent(platform.window.hdc, platform.window.hrc);
+
+#if 0
+    wglChoosePixelFormatARB    = (PFNWGLCHOOSEPIXELFORMATARBPROC)    wglGetProcAddress("wglChoosePixelFormatARB");
+    wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+    wglMakeContextCurrentARB   = (PFNWGLMAKECONTEXTCURRENTARBPROC)   wglGetProcAddress("wglMakeContextCurrentARB");
+    wglSwapIntervalEXT         = (PFNWGLSWAPINTERVALEXTPROC)         wglGetProcAddress("wglSwapIntervalEXT");
+
+    {
+        int attribs[] = {
+            WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+            WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+            WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
+            WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
+            WGL_COLOR_BITS_ARB,     32,
+            WGL_DEPTH_BITS_ARB,     24,
+            WGL_STENCIL_BITS_ARB,   8,
+            0
+        };
+
+        UINT num_formats = 0;
+        wglChoosePixelFormatARB(platform.window.hdc, attribs, 0, 1, &pixel_format, &num_formats);
+    }
 
     if (pixel_format) {
-        SetPixelFormat(platform.window.hdc, pixel_format, &pfd);
-        auto dummy_hrc = wglCreateContext(platform.window.hdc);
-        wglMakeCurrent(platform.window.hdc, dummy_hrc);
+        const int attribs[] = {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+            WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+            0
+        };
 
-        wglChoosePixelFormatARB    = (PFNWGLCHOOSEPIXELFORMATARBPROC)    wglGetProcAddress("wglChoosePixelFormatARB");
-        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
-        wglMakeContextCurrentARB   = (PFNWGLMAKECONTEXTCURRENTARBPROC)   wglGetProcAddress("wglMakeContextCurrentARB");
-        wglSwapIntervalEXT         = (PFNWGLSWAPINTERVALEXTPROC)         wglGetProcAddress("wglSwapIntervalEXT");
+        platform.window.hrc = wglCreateContextAttribsARB(platform.window.hdc, dummy_hrc, attribs);
 
-        {
-            int attribs[] = {
-                WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-                WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-                WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
-                WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-                WGL_COLOR_BITS_ARB,     32,
-                WGL_DEPTH_BITS_ARB,     24,
-                WGL_STENCIL_BITS_ARB,   8,
-                0
-            };
-
-            UINT num_formats = 0;
-            wglChoosePixelFormatARB(platform.window.hdc, attribs, 0, 1, &pixel_format, &num_formats);
-        }
-
-        if (pixel_format) {
-            const int attribs[] = {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-                0
-            };
-
-            platform.window.hrc = wglCreateContextAttribsARB(platform.window.hdc, dummy_hrc, attribs);
-
-            if (platform.window.hrc) {
-                wglMakeCurrent(platform.window.hdc, 0);
-                wglDeleteContext(dummy_hrc);
-                wglMakeCurrent(platform.window.hdc, platform.window.hrc);
-                wglSwapIntervalEXT(0);
-            }
-        }
-
-        // laod all opengl funcitns
-        {
-#define GLProc(name, type) gl##name = (PFNGL##type##PROC)wglGetProcAddress("gl" #name);
-            GL_PROC_LIST
-#undef GLProc
+        if (platform.window.hrc) {
+            wglMakeCurrent(platform.window.hdc, 0);
+            wglDeleteContext(dummy_hrc);
+            wglMakeCurrent(platform.window.hdc, platform.window.hrc);
+            wglSwapIntervalEXT(0);
         }
     }
+
+    // laod all opengl funcitns
+    {
+#define GLProc(name, type) gl##name = (PFNGL##type##PROC)wglGetProcAddress("gl" #name);
+        GL_PROC_LIST
+#undef GLProc
+    }
+#endif
 }
 
 static void initPlatform(const char* title, i32 width, i32 height) {
@@ -671,28 +670,20 @@ static void initPlatform(const char* title, i32 width, i32 height) {
     wc.hCursor        = LoadCursorA(NULL, IDC_ARROW);
     wc.lpszClassName  = title;
 
-    RegisterClassA(&wc);
+    RegisterClass(&wc);
 
-    RECT rect = { 0, 0, width, height };
-    AdjustWindowRect(&rect, WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX, 0);
-
-    platform.window.handle = CreateWindowExA(
-        WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
-        title, title,
-        WS_OVERLAPPEDWINDOW | WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-        CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL,
-        instance, NULL);
+    platform.window.hwnd = CreateWindow(title, title, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, 0);
 
     initOpenGL();
 
-    ShowWindow(platform.window.handle, SW_SHOW);
-    SetForegroundWindow(platform.window.handle);
-    SetFocus(platform.window.handle);
+    ShowWindow(platform.window.hwnd, SW_SHOW);
+    SetForegroundWindow(platform.window.hwnd);
+    SetFocus(platform.window.hwnd);
 
     int screen_width    = GetSystemMetrics(SM_CXSCREEN);
     int screen_height   = GetSystemMetrics(SM_CYSCREEN);
 
-    MoveWindow(platform.window.handle, (screen_width / 2)  - (width / 2), (screen_height / 2) - (height / 2), width, height, FALSE);
+    MoveWindow(platform.window.hwnd, (screen_width / 2)  - (width / 2), (screen_height / 2) - (height / 2), width, height, FALSE);
 
     platform.time.total = getCurrentTime();
 }
@@ -704,8 +695,8 @@ static void updatePlatform(void) {
         memset(platform.keyboard.released, 0, sizeof (platform.keyboard.released));
 
         MSG message = {0};
-        while (PeekMessageA(&message, 0, 0, 0, PM_REMOVE)) {
-            DispatchMessageA(&message);
+        while (PeekMessage(&message, 0, 0, 0, PM_REMOVE)) {
+            DispatchMessage(&message);
 
             if (message.message == WM_QUIT) {
                 platform.close = true;
@@ -714,16 +705,14 @@ static void updatePlatform(void) {
     }
 
     RECT rect;
-    GetClientRect(platform.window.handle, &rect);
+    GetClientRect(platform.window.hwnd, &rect);
     
     platform.window.width  = rect.right - rect.left;
     platform.window.height = rect.bottom - rect.top;
     platform.window.aspect_ratio = (f32)platform.window.width / (f32)platform.window.height;
 
     glViewport(0, 0, platform.window.width, platform.window.height);
-
-    //SwapBuffers(platform.window.hdc);
-    wglSwapLayerBuffers(platform.window.hdc, WGL_SWAP_MAIN_PLANE);
+    SwapBuffers(platform.window.hdc);
 
     {
         platform.time.delta = getCurrentTime() - platform.time.total;
