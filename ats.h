@@ -1,8 +1,10 @@
 #pragma once
 
-#define WIN32_MEAN_AND_LEAN
+//#define WIN32_MEAN_AND_LEAN
 #include <windows.h>
 #include <GL/gl.h>
+#include "ext/wglext.h"
+#include "ext/glext.h"
 #include <math.h>
 
 #define PI (3.14159265359f)
@@ -530,7 +532,7 @@ static f64 getCurrentTime(void) {
     return (counter.QuadPart - start_counter.QuadPart) / (f64)frequency.QuadPart;
 }
 
-static LRESULT win32_window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
+static LRESULT win32_windowProc(HWND window, UINT message, WPARAM wparam, LPARAM lparam) {
     switch (message) {
         case WM_DESTROY: {
             platform.close = true;
@@ -549,7 +551,98 @@ static LRESULT win32_window_proc(HWND window, UINT message, WPARAM wparam, LPARA
     return DefWindowProcA(window, message, wparam, lparam);
 }
 
-static void initPlatform(const char* title, i32 width, i32 height, u32 bits) {
+#define GL_PROC_LIST \
+    GLProc(CreateShader, CREATESHADER) \
+    GLProc(ShaderSource, SHADERSOURCE) \
+    GLProc(CompileShader, COMPILESHADER) \
+    GLProc(CreateProgram, CREATEPROGRAM) \
+    GLProc(AttachShader, ATTACHSHADER) \
+    GLProc(LinkProgram, LINKPROGRAM) \
+    GLProc(DeleteShader, DELETESHADER) \
+    GLProc(UseProgram, USEPROGRAM) \
+    GLProc(GetProgramiv, GETPROGRAMIV) \
+    GLProc(GetShaderiv, GETSHADERIV) \
+    GLProc(GetShaderInfoLog, GETSHADERINFOLOG) \
+    GLProc(GetProgramInfoLog, GETPROGRAMINFOLOG) \
+
+#define GLProc(name, type) static PFNGL##type##PROC gl##name = 0;
+GL_PROC_LIST
+#undef GLProc
+
+static PFNWGLCHOOSEPIXELFORMATARBPROC       wglChoosePixelFormatARB;
+static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
+static PFNWGLMAKECONTEXTCURRENTARBPROC      wglMakeContextCurrentARB;
+static PFNWGLSWAPINTERVALEXTPROC            wglSwapIntervalEXT;
+
+static void initOpenGL(void) {
+    PIXELFORMATDESCRIPTOR pfd = {};
+
+    pfd.nSize          = sizeof (PIXELFORMATDESCRIPTOR);
+    pfd.nVersion       = 1;
+    pfd.dwFlags        = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType     = PFD_TYPE_RGBA;
+    pfd.cColorBits     = 32;
+    pfd.cDepthBits     = 24;
+    pfd.cStencilBits   = 8;
+    pfd.iLayerType     = PFD_MAIN_PLANE;
+
+    platform.window.hdc = GetDC(platform.window.handle);
+    auto pixel_format = ChoosePixelFormat(platform.window.hdc, &pfd);
+
+
+    if (pixel_format) {
+        SetPixelFormat(platform.window.hdc, pixel_format, &pfd);
+        auto dummy_hrc = wglCreateContext(platform.window.hdc);
+        wglMakeCurrent(platform.window.hdc, dummy_hrc);
+
+        wglChoosePixelFormatARB    = (PFNWGLCHOOSEPIXELFORMATARBPROC)    wglGetProcAddress("wglChoosePixelFormatARB");
+        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+        wglMakeContextCurrentARB   = (PFNWGLMAKECONTEXTCURRENTARBPROC)   wglGetProcAddress("wglMakeContextCurrentARB");
+        wglSwapIntervalEXT         = (PFNWGLSWAPINTERVALEXTPROC)         wglGetProcAddress("wglSwapIntervalEXT");
+
+        {
+            int pf_attribs_i[] = {
+                WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+                WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+                WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+                WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+                WGL_COLOR_BITS_ARB, 32,
+                WGL_DEPTH_BITS_ARB, 24,
+                WGL_STENCIL_BITS_ARB, 8,
+                0
+            };
+
+            UINT num_formats = 0;
+            wglChoosePixelFormatARB(platform.window.hdc, pf_attribs_i, 0, 1, &pixel_format, &num_formats);
+        }
+
+        if (pixel_format) {
+            const int context_attribs[] = {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+                WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+                0
+            };
+
+            platform.window.hrc = wglCreateContextAttribsARB(platform.window.hdc, dummy_hrc, context_attribs);
+
+            if (platform.window.hrc) {
+                wglMakeCurrent(platform.window.hdc, 0);
+                wglDeleteContext(dummy_hrc);
+                wglMakeCurrent(platform.window.hdc, platform.window.hrc);
+                wglSwapIntervalEXT(0);
+            }
+        }
+
+        // laod all opengl funcitns
+        {
+#define GLProc(name, type) gl##name = (PFNGL##type##PROC)wglGetProcAddress("gl" #name);
+            GL_PROC_LIST
+#undef GLProc
+        }
+    }
+}
+
+static void initPlatform(const char* title, i32 width, i32 height) {
     platform.window.width  = width;
     platform.window.height = height;
 
@@ -558,7 +651,7 @@ static void initPlatform(const char* title, i32 width, i32 height, u32 bits) {
     WNDCLASS wc = {};
 
     wc.style          = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wc.lpfnWndProc    = win32_window_proc;
+    wc.lpfnWndProc    = win32_windowProc;
     wc.hInstance      = instance;
     wc.hCursor        = LoadCursorA(NULL, IDC_ARROW);
     wc.lpszClassName  = title;
@@ -575,23 +668,7 @@ static void initPlatform(const char* title, i32 width, i32 height, u32 bits) {
         CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL,
         instance, NULL);
 
-    PIXELFORMATDESCRIPTOR pdf = {};
-
-    pdf.nSize          = sizeof (PIXELFORMATDESCRIPTOR);
-    pdf.nVersion       = 1;
-    pdf.dwFlags        = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pdf.iPixelType     = PFD_TYPE_RGBA;
-    pdf.cColorBits     = (u8)bits;
-    pdf.cDepthBits     = 24;
-    pdf.cStencilBits   = 8;
-    pdf.iLayerType     = PFD_MAIN_PLANE;
-
-    platform.window.hdc = GetDC(platform.window.handle);
-    u32 pixel_format = ChoosePixelFormat(platform.window.hdc, &pdf);
-    SetPixelFormat(platform.window.hdc, pixel_format, &pdf);
-
-    platform.window.hrc = wglCreateContext(platform.window.hdc);
-    wglMakeCurrent(platform.window.hdc, platform.window.hrc);
+    initOpenGL();
 
     ShowWindow(platform.window.handle, SW_SHOW);
     SetForegroundWindow(platform.window.handle);
@@ -630,7 +707,8 @@ static void updatePlatform(void) {
 
     glViewport(0, 0, platform.window.width, platform.window.height);
 
-    SwapBuffers(platform.window.hdc);
+    //SwapBuffers(platform.window.hdc);
+    wglSwapLayerBuffers(platform.window.hdc, WGL_SWAP_MAIN_PLANE);
 
     {
         platform.time.delta = getCurrentTime() - platform.time.total;
@@ -640,5 +718,61 @@ static void updatePlatform(void) {
 
 static void exitPlatform(void) {
     ExitProcess(0);
+}
+
+// ==================================================== OPENGL STUFF ============================================== //
+
+static u32 gl_compileShader(const char* source, unsigned int type) {
+    int success = 0;
+    char info_log[512] = {0};
+    u32 shader = glCreateShader(type);
+
+    glShaderSource(shader, 1, &source, NULL);
+    glCompileShader(shader);
+
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+    if (!success) {
+        glGetShaderInfoLog(shader, 512, NULL, info_log);
+        //puts(info_log);
+        //exit(EXIT_FAILURE);
+    }
+
+    return shader;
+}
+
+static u32 gl_linkShader(u32 vertex_shader, u32 fragment_shader) {
+    int success = 0;
+    char info_log[512] = {0};
+
+    u32 shader = glCreateProgram();
+
+    glAttachShader(shader, vertex_shader);
+    glAttachShader(shader, fragment_shader);
+
+    glLinkProgram(shader);
+
+    glGetProgramiv(shader, GL_LINK_STATUS, &success);
+
+    if (!success) {
+        glGetProgramInfoLog(shader, 512, NULL, info_log);
+        //puts(info_log);
+        //exit(EXIT_FAILURE);
+    }
+
+    return shader;
+}
+
+extern u32 gl_createShader(const char* vs, const char* fs) {
+    u32 vertex   = gl_compileShader(vs, GL_VERTEX_SHADER);
+    u32 fragment = gl_compileShader(fs, GL_FRAGMENT_SHADER);
+    u32 program  = gl_linkShader(vertex, fragment);
+
+    glUseProgram(program);
+
+    glDeleteShader(vertex);
+    glDeleteShader(fragment);
+
+    return program;
 }
 

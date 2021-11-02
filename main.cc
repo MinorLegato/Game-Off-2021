@@ -1,7 +1,10 @@
 #include "ats.h"
+#include <stdio.h>
 
 int main(void) {
-    initPlatform("Game Off 2021", 800, 600, 24);
+    initPlatform("Game Off 2021", 800, 600);
+
+    puts((char*)glGetString(GL_VERSION));
 
     auto pos = v2(0, 0);
 
