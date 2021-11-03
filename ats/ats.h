@@ -85,113 +85,113 @@ typedef u64 b64;
 
 // =========================================== TYPES ========================================= //
 
-typedef union Vec2 {
+union Vec2 {
     struct { f32 x, y; };
 
     f32 e[2];
-} vec2_t;
+};
 
-typedef union Vec3 {
+union Vec3 {
     struct { f32 x, y, z; };
     struct { f32 r, g, b; };
 
-    struct { vec2_t xy; };
-    struct { f32 _p; vec2_t yz; };
+    struct { Vec2 xy; };
+    struct { f32 _p; Vec2 yz; };
 
     f32 e[3];
-} vec3_t;
+};
 
-typedef union Vec4 {
+union Vec4 {
     struct { f32 x, y, z, w; };
     struct { f32 r, g, b, a; };
-    struct { vec3_t rgb; };
-    struct { vec3_t xyz; };
+    struct { Vec3 rgb; };
+    struct { Vec3 xyz; };
 
     f32 e[4];
-} vec4_t;
+};
 
-typedef union Vec2i {
+union Vec2i {
     struct { i32 x, y; };
 
     i32 e[2];
-} vec2i_t;
+};
 
-typedef union Vec3i {
+union Vec3i {
     struct { i32 x, y, z; };
-    struct { vec2i_t xy; };
+    struct { Vec2i xy; };
 
-    struct { i32 _p; vec2i_t yz; };
+    struct { i32 _p; Vec2i yz; };
 
     i32 e[3];
-} vec3i_t;
+};
 
-typedef union Vec4i {
+union Vec4i {
     struct { i32 x, y, z, w; };
 
     i32 e[4];
-} vec4i_t;
+};
 
-typedef union Mat2 {
+union Mat2 {
     f32 e[4];
-    struct { vec2_t x, y; };
-} mat2_t;
+    struct { Vec2 x, y; };
+};
 
-typedef union Mat3 {
+union Mat3 {
     f32 e[9];
-    struct { vec3_t x, y, z; };
-} mat3_t;
+    struct { Vec3 x, y, z; };
+};
 
-typedef union Mat4 {
+union Mat4 {
     f32 e[16];
-    struct { vec4_t x, y, z, w; };
-} mat4_t;
+    struct { Vec4 x, y, z, w; };
+};
 
-typedef struct Quat {
+struct Quat {
     f32 x, y, z, w;
-} quat_t;
+};
 
-typedef struct Circle {
-    vec2_t  pos;
+struct Circle {
+    Vec2  pos;
     f32     rad;
-} circle_t;
+};
 
-typedef struct Sphere {
-    vec3_t  pos;
+struct Sphere {
+    Vec3  pos;
     f32     rad;
-} sphere_t;
+};
 
-typedef struct Rect2 {
-    vec2_t  min;
-    vec2_t  max;
-} rect2_t;
+struct Rect2 {
+    Vec2  min;
+    Vec2  max;
+};
 
-typedef struct Rect3 {
-    vec3_t  min;
-    vec3_t  max;
-} rect3_t;
+struct Rect3 {
+    Vec3  min;
+    Vec3  max;
+};
 
-typedef struct Rect2i {
-    vec2i_t     min;
-    vec2i_t     max;
-} rect2i_t;
+struct Rect2i {
+    Vec2i     min;
+    Vec2i     max;
+};
 
-typedef struct Rect3i {
-    vec3i_t     min;
-    vec3i_t     max;
-} rect3i_t;
+struct Rect3i {
+    Vec3i     min;
+    Vec3i     max;
+};
 
-typedef struct Plane {
+struct Plane {
     f32     a;
     f32     b;
     f32     c;
     f32     d;
-} plane_t;
+};
 
-typedef struct Frustum {
-    plane_t     plane[6];
-} frustum_t;
+struct Frustum {
+    Plane     plane[6];
+};
 
-typedef struct MemoryArena {
+struct MemoryArena {
     u32     index;
     u32     cap;
     u8*     buffer;
@@ -201,74 +201,74 @@ typedef struct MemoryArena {
 
     u32     lock;
     u32     max;
-} memory_arena_t;
+};
 
-typedef struct Image {
+struct Image {
     int     width;
     int     height;
 
     u32*    pixels;
-} image_t;
+};
 
 // ----------------------------- C / C++ specific stuff ------------------------------- //
 
 #define ctor(Type, ...) (Type { __VA_ARGS__ })
 
-#define m2(...)     ctor(mat2_t, __VA_ARGS__)
-#define m3(...)     ctor(mat3_t, __VA_ARGS__)
-#define m4(...)     ctor(mat4_t, __VA_ARGS__)
+#define m2(...)     ctor(Mat2, __VA_ARGS__)
+#define m3(...)     ctor(Mat3, __VA_ARGS__)
+#define m4(...)     ctor(Mat4, __VA_ARGS__)
 
-#define quat(...)   ctor(quat_t, __VA_ARGS__)
+#define quat(...)   ctor(Quat, __VA_ARGS__)
 
-#define circle(...) ctor(circle_t,  __VA_ARGS__)
+#define circle(...) ctor(Circle,  __VA_ARGS__)
 
-#define rect2(...)  ctor(rect2_t, __VA_ARGS__)
-#define rect3(...)  ctor(rect3_t, __VA_ARGS__)
+#define rect2(...)  ctor(Rect2, __VA_ARGS__)
+#define rect3(...)  ctor(Rect3, __VA_ARGS__)
 
-#define rect2i(...) ctor(rect2i_t, __VA_ARGS__)
-#define rect3i(...) ctor(rect3i_t, __VA_ARGS__)
+#define rect2i(...) ctor(Rect2i, __VA_ARGS__)
+#define rect3i(...) ctor(Rect3i, __VA_ARGS__)
 
 // -------------------------- creation ---------------------------- //
 
 // ------------ v2 ----------- //
-static vec2_t v2(f32 x, f32 y)                  { return { x, y }; }
-static vec2_t v2(f32 n)                         { return { n, n }; }
-static vec2_t v2(vec3_t u)                      { return v2(u.x, u.y); }
-static vec2_t v2(vec2i_t u)                     { return v2(u.x, u.y); }
-static vec2_t v2(vec3i_t u)                     { return v2(u.x, u.y); }
-static vec2_t v2(vec4i_t u)                     { return v2(u.x, u.y); }
+static Vec2 v2(f32 x, f32 y)                  { return { x, y }; }
+static Vec2 v2(f32 n)                         { return { n, n }; }
+static Vec2 v2(Vec3 u)                      { return v2(u.x, u.y); }
+static Vec2 v2(Vec2i u)                     { return v2(u.x, u.y); }
+static Vec2 v2(Vec3i u)                     { return v2(u.x, u.y); }
+static Vec2 v2(Vec4i u)                     { return v2(u.x, u.y); }
 
 // ------------ v3 ----------- //
-static vec3_t v3(f32 x, f32 y, f32 z)           { return { x, y, z }; }
-static vec3_t v3(f32 n)                         { return { n, n, n }; }
-static vec3_t v3(vec2_t u, f32 z = 0)           { return v3(u.x, u.y, z); }
-static vec3_t v3(vec4_t u)                      { return v3(u.x, u.y, u.z); }
-static vec3_t v3(vec2i_t u, f32 z = 0)          { return v3(u.x, u.y, z); }
-static vec3_t v3(vec3i_t u)                     { return v3(u.x, u.y, u.z); }
-static vec3_t v3(vec4i_t u)                     { return v3(u.x, u.y, u.z); }
+static Vec3 v3(f32 x, f32 y, f32 z)           { return { x, y, z }; }
+static Vec3 v3(f32 n)                         { return { n, n, n }; }
+static Vec3 v3(Vec2 u, f32 z = 0)           { return v3(u.x, u.y, z); }
+static Vec3 v3(Vec4 u)                      { return v3(u.x, u.y, u.z); }
+static Vec3 v3(Vec2i u, f32 z = 0)          { return v3(u.x, u.y, z); }
+static Vec3 v3(Vec3i u)                     { return v3(u.x, u.y, u.z); }
+static Vec3 v3(Vec4i u)                     { return v3(u.x, u.y, u.z); }
 
 // ------------ v4 ----------- //
-static vec4_t v4(f32 x, f32 y, f32 z, f32 w)    { return { x, y, z, w }; }
-static vec4_t v4(f32 n)                         { return { n, n, n, n }; }
-static vec4_t v4(vec3_t u, f32 w = 0)           { return v4(u.x, u.y, u.z, w); }
-static vec4_t v4(vec4i_t u)                     { return v4(u.x, u.y, u.z, u.w); }
+static Vec4 v4(f32 x, f32 y, f32 z, f32 w)    { return { x, y, z, w }; }
+static Vec4 v4(f32 n)                         { return { n, n, n, n }; }
+static Vec4 v4(Vec3 u, f32 w = 0)           { return v4(u.x, u.y, u.z, w); }
+static Vec4 v4(Vec4i u)                     { return v4(u.x, u.y, u.z, u.w); }
 
 // ------------ v2i ----------- //
-static vec2i_t v2i(i32 x, i32 y)                { return { x, y }; }
-static vec2i_t v2i(i32 n)                       { return { n, n }; }
-static vec2i_t v2i(vec2_t u)                    { return v2i(u.x, u.y); }
-static vec2i_t v2i(vec3_t u)                    { return v2i(u.x, u.y); }
+static Vec2i v2i(i32 x, i32 y)                { return { x, y }; }
+static Vec2i v2i(i32 n)                       { return { n, n }; }
+static Vec2i v2i(Vec2 u)                    { return v2i(u.x, u.y); }
+static Vec2i v2i(Vec3 u)                    { return v2i(u.x, u.y); }
 
 // ------------ v3i ----------- //
-static vec3i_t v3i(i32 x, i32 y, i32 z)         { return { x, y, z }; }
-static vec3i_t v3i(i32 n)                       { return { n, n, n }; }
-static vec3i_t v3i(vec2_t u, f32 z = 0)         { return v3i(u.x, u.y, z); }
-static vec3i_t v3i(vec3_t u)                    { return v3i(u.x, u.y, u.z); }
-static vec3i_t v3i(vec4_t u)                    { return v3i(u.x, u.y, u.z); }
+static Vec3i v3i(i32 x, i32 y, i32 z)         { return { x, y, z }; }
+static Vec3i v3i(i32 n)                       { return { n, n, n }; }
+static Vec3i v3i(Vec2 u, f32 z = 0)         { return v3i(u.x, u.y, z); }
+static Vec3i v3i(Vec3 u)                    { return v3i(u.x, u.y, u.z); }
+static Vec3i v3i(Vec4 u)                    { return v3i(u.x, u.y, u.z); }
 
 // ------------ v4i ----------- //
-static vec4i_t v4i(i32 x, i32 y, i32 z, i32 w)  { return { x, y, z, w }; }
-static vec4i_t v4i(i32 n)                       { return { n, n, n, n }; }
+static Vec4i v4i(i32 x, i32 y, i32 z, i32 w)  { return { x, y, z, w }; }
+static Vec4i v4i(i32 n)                       { return { n, n, n, n }; }
 
 // ======================================= STATIC FUNCTIONS ==================================== //
 
@@ -309,40 +309,40 @@ static f32 lerpAngleF32(f32 a, f32 b, f32 t) {
 
 // ---------- from array ---------- //
 
-static vec2_t v2FromArray(const f32* a) {
+static Vec2 v2FromArray(const f32* a) {
     return v2(a[0], a[1]);
 }
 
-static vec3_t v3FromArray(const f32* a) {
+static Vec3 v3FromArray(const f32* a) {
     return v3(a[0], a[1], a[2]);
 }
 
-static vec4_t v4FromArray(const f32* a) {
+static Vec4 v4FromArray(const f32* a) {
     return v4(a[0], a[1], a[2], a[3]);
 }
 
-static vec2i_t v2iFromArray(const i32* a) {
+static Vec2i v2iFromArray(const i32* a) {
     return v2i(a[0], a[1]);
 }
 
-static vec3i_t v3iFromArray(const i32* a) {
+static Vec3i v3iFromArray(const i32* a) {
     return v3i(a[0], a[1], a[2]);
 }
 
-static vec4i_t v4iFromArray(const i32* a) {
+static Vec4i v4iFromArray(const i32* a) {
     return v4i(a[0], a[1], a[2], a[3]);
 }
 
 // ---------- from color ------------ //
 
-static vec3_t v3FromPackedColor(u32 color) {
+static Vec3 v3FromPackedColor(u32 color) {
     return v3(
         ((color & 0x000000ff) >> 0)  / 256.0f,
         ((color & 0x0000ff00) >> 8)  / 256.0f,
         ((color & 0x00ff0000) >> 16) / 256.0f);
 }
 
-static vec4_t v4FromPackedColor(u32 color) {
+static Vec4 v4FromPackedColor(u32 color) {
     return v4(
         ((color & 0x000000ff) >> 0)  / 256.0f,
         ((color & 0x0000ff00) >> 8)  / 256.0f,
@@ -352,19 +352,19 @@ static vec4_t v4FromPackedColor(u32 color) {
 
 // ---------- identity ----------- //
 
-static mat2_t m2Identity(void) {
+static Mat2 m2Identity(void) {
     return m2(1, 0,
               0, 1);
 }
 
-static mat3_t m3Identity(void) {
+static Mat3 m3Identity(void) {
     return m3(
         1, 0, 0,
         0, 1, 0,
         0, 0, 1);
 }
 
-static mat4_t m4Identity(void) {
+static Mat4 m4Identity(void) {
     return m4(
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -372,128 +372,128 @@ static mat4_t m4Identity(void) {
         0, 0, 0, 1);
 }
 
-static quat_t quatIdentity(void) {
+static Quat quatIdentity(void) {
     return quat(0, 0, 0, 1);
 }
 
 // --------- negate ---------- //
 
-static vec2_t v2Neg(vec2_t u) {
+static Vec2 v2Neg(Vec2 u) {
     return v2(-u.x, -u.y);
 }
 
-static vec3_t v3Neg(vec3_t u) {
+static Vec3 v3Neg(Vec3 u) {
     return v3(-u.x, -u.y, -u.z);
 }
 
-static vec4_t v4Neg(vec4_t u) {
+static Vec4 v4Neg(Vec4 u) {
     return v4(-u.x, -u.y, -u.z, -u.w);
 }
 
-static vec2i_t v2iNeg(vec2i_t u) {
+static Vec2i v2iNeg(Vec2i u) {
     return v2i(-u.x, -u.y);
 }
 
-static vec3i_t v3iNeg(vec3i_t u) {
+static Vec3i v3iNeg(Vec3i u) {
     return v3i(-u.x, -u.y, -u.z);
 }
 
-static vec4i_t v4iNeg(vec4i_t u) {
+static Vec4i v4iNeg(Vec4i u) {
     return v4i(-u.x, -u.y, -u.z, -u.w);
 }
 
 // ---------- addition ---------- //
 
-static vec2_t v2Add(vec2_t a, vec2_t b) {
+static Vec2 v2Add(Vec2 a, Vec2 b) {
     return v2(a.x + b.x, a.y + b.y);
 }
 
-static vec3_t v3Add(vec3_t a, vec3_t b) {
+static Vec3 v3Add(Vec3 a, Vec3 b) {
     return v3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-static vec4_t v4Add(vec4_t a, vec4_t b) {
+static Vec4 v4Add(Vec4 a, Vec4 b) {
     return v4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 }
 
-static vec2i_t v2iAdd(vec2i_t a, vec2i_t b) {
+static Vec2i v2iAdd(Vec2i a, Vec2i b) {
     return v2i(a.x + b.x, a.y + b.y);
 }
 
-static vec3i_t v3iAdd(vec3i_t a, vec3i_t b) {
+static Vec3i v3iAdd(Vec3i a, Vec3i b) {
     return v3i(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-static vec4i_t v4iAdd(vec4i_t a, vec4i_t b) {
+static Vec4i v4iAdd(Vec4i a, Vec4i b) {
     return v4i(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 }
 
 // -------- subtraction ------- //
 
-static vec2_t v2Sub(vec2_t a, vec2_t b) {
+static Vec2 v2Sub(Vec2 a, Vec2 b) {
     return v2(a.x - b.x, a.y - b.y);
 }
 
-static vec3_t v3Sub(vec3_t a, vec3_t b) {
+static Vec3 v3Sub(Vec3 a, Vec3 b) {
     return v3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-static vec4_t v4Sub(vec4_t a, vec4_t b) {
+static Vec4 v4Sub(Vec4 a, Vec4 b) {
     return v4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
 }
 
-static vec2i_t v2iSub(vec2i_t a, vec2i_t b) {
+static Vec2i v2iSub(Vec2i a, Vec2i b) {
     return v2i(a.x - b.x, a.y - b.y);
 }
 
-static vec3i_t v3iSub(vec3i_t a, vec3i_t b) {
+static Vec3i v3iSub(Vec3i a, Vec3i b) {
     return v3i(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-static vec4i_t v4iSub(vec4i_t a, vec4i_t b) {
+static Vec4i v4iSub(Vec4i a, Vec4i b) {
     return v4i(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
 }
 
 // -------- multiplication ------- //
 
-static vec2_t v2Mul(vec2_t a, vec2_t b) {
+static Vec2 v2Mul(Vec2 a, Vec2 b) {
     return v2(a.x * b.x, a.y * b.y);
 }
 
-static vec3_t v3Mul(vec3_t a, vec3_t b) {
+static Vec3 v3Mul(Vec3 a, Vec3 b) {
     return v3(a.x * b.x, a.y * b.y, a.z * b.z);
 }
 
-static vec4_t v4Mul(vec4_t a, vec4_t b) {
+static Vec4 v4Mul(Vec4 a, Vec4 b) {
     return v4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * a.w);
 }
 
-static vec2i_t v2iMul(vec2i_t a, vec2i_t b) {
+static Vec2i v2iMul(Vec2i a, Vec2i b) {
     return v2i(a.x * b.x, a.y * b.y);
 }
 
-static vec3i_t v3iMul(vec3i_t a, vec3i_t b) {
+static Vec3i v3iMul(Vec3i a, Vec3i b) {
     return v3i(a.x * b.x, a.y * b.y, a.z * a.z);
 }
 
-static vec4i_t v4iMul(vec4i_t a, vec4i_t b) {
+static Vec4i v4iMul(Vec4i a, Vec4i b) {
     return v4i(a.x * b.x, a.y * b.y, a.z * a.z, a.w * a.w);
 }
 
-static vec2_t m2Mul(mat2_t m, vec2_t u) {
+static Vec2 m2Mul(Mat2 m, Vec2 u) {
     return v2(
         m.e[0] * u.x + m.e[2] * u.y,
         m.e[1] * u.x + m.e[3] * u.y);
 }
 
-static vec3_t m3Mul(mat3_t m, vec3_t u) {
+static Vec3 m3Mul(Mat3 m, Vec3 u) {
     return v3(
         m.e[0] * u.x + m.e[3] * u.y + m.e[6] * u.z,
         m.e[1] * u.x + m.e[4] * u.y + m.e[7] * u.z,
         m.e[2] * u.x + m.e[5] * u.y + m.e[8] * u.z);
 }
 
-static vec4_t m4Mul(mat4_t m, vec4_t u) {
+static Vec4 m4Mul(Mat4 m, Vec4 u) {
     return v4(
         m.e[0] * u.x + m.e[4] * u.y + m.e[8]  * u.z + m.e[12] * u.w,
         m.e[1] * u.x + m.e[5] * u.y + m.e[9]  * u.z + m.e[13] * u.w,
@@ -501,7 +501,7 @@ static vec4_t m4Mul(mat4_t m, vec4_t u) {
         m.e[3] * u.x + m.e[7] * u.y + m.e[11] * u.z + m.e[15] * u.w);
 }
 
-static mat2_t m2Mul(mat2_t a, mat2_t b) {
+static Mat2 m2Mul(Mat2 a, Mat2 b) {
     return m2(
         a.e[0] * b.e[0] + a.e[2] * b.e[1],
         a.e[1] * b.e[0] + a.e[3] * b.e[1],
@@ -509,7 +509,7 @@ static mat2_t m2Mul(mat2_t a, mat2_t b) {
         a.e[1] * b.e[2] + a.e[3] * b.e[3]);
 }
 
-static mat3_t m3Mul(mat3_t a, mat3_t b) {
+static Mat3 m3Mul(Mat3 a, Mat3 b) {
     return m3(
         a.e[0] * b.e[0] + a.e[3] * b.e[1]  + a.e[6] * b.e[2],
         a.e[1] * b.e[0] + a.e[4] * b.e[1]  + a.e[7] * b.e[2],
@@ -524,7 +524,7 @@ static mat3_t m3Mul(mat3_t a, mat3_t b) {
         a.e[2] * b.e[6] + a.e[5] * b.e[7]  + a.e[8] * b.e[8]);
 }
 
-static mat4_t m4Mul(mat4_t a, mat4_t b) {
+static Mat4 m4Mul(Mat4 a, Mat4 b) {
     return m4(
         a.e[0] * b.e[0]  + a.e[4] * b.e[1]  + a.e[8]  * b.e[2]  + a.e[12] * b.e[3],
         a.e[1] * b.e[0]  + a.e[5] * b.e[1]  + a.e[9]  * b.e[2]  + a.e[13] * b.e[3],
@@ -547,7 +547,7 @@ static mat4_t m4Mul(mat4_t a, mat4_t b) {
         a.e[3] * b.e[12] + a.e[7] * b.e[13] + a.e[11] * b.e[14] + a.e[15] * b.e[15]);
 }
 
-static quat_t quatMul(quat_t a, quat_t b) {
+static Quat quatMul(Quat a, Quat b) {
     return quat(
         a.y * b.z - a.z * b.y + a.w * b.x + b.w * a.x,
         a.z * b.x - a.x * b.z + a.w * b.y + b.w * a.y,
@@ -557,206 +557,206 @@ static quat_t quatMul(quat_t a, quat_t b) {
 
 // ------------ divition ------------ //
 
-static vec2_t v2Div(vec2_t a, vec2_t b) {
+static Vec2 v2Div(Vec2 a, Vec2 b) {
     return v2(a.x / b.x, a.y / b.y);
 }
 
-static vec3_t v3Div(vec3_t a, vec3_t b) {
+static Vec3 v3Div(Vec3 a, Vec3 b) {
     return v3(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
-static vec4_t v4Div(vec4_t a, vec4_t b) {
+static Vec4 v4Div(Vec4 a, Vec4 b) {
     return v4(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
 }
 
-static vec2i_t v2iDiv(vec2i_t a, vec2i_t b) {
+static Vec2i v2iDiv(Vec2i a, Vec2i b) {
     return v2i(a.x / b.x, a.y / b.y);
 }
 
-static vec3i_t v3iDiv(vec3i_t a, vec3i_t b) {
+static Vec3i v3iDiv(Vec3i a, Vec3i b) {
     return v3i(a.x / b.x, a.y / b.y, a.z / b.z);
 }
 
-static vec4i_t v4iDiv(vec4i_t a, vec4i_t b) {
+static Vec4i v4iDiv(Vec4i a, Vec4i b) {
     return v4i(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
 }
 
 // ------------- scaling ------------- //
 
-static vec2_t v2Scale(vec2_t a, f32 s) {
+static Vec2 v2Scale(Vec2 a, f32 s) {
     return v2(a.x * s, a.y * s);
 }
 
-static vec3_t v3Scale(vec3_t a, f32 s) {
+static Vec3 v3Scale(Vec3 a, f32 s) {
     return v3(a.x * s, a.y * s, a.z * s);
 }
 
-static vec4_t v4Scale(vec4_t a, f32 s) {
+static Vec4 v4Scale(Vec4 a, f32 s) {
     return v4(a.x * s, a.y * s, a.z * s, a.w * s);
 }
 
-static vec2i_t v2iScale(vec2i_t a, i32 s) {
+static Vec2i v2iScale(Vec2i a, i32 s) {
     return v2i(a.x * s, a.y * s);
 }
 
-static vec3i_t v3iScale(vec3i_t a, i32 s) {
+static Vec3i v3iScale(Vec3i a, i32 s) {
     return v3i(a.x * s, a.y * s, a.z * s);
 }
 
-static vec4i_t v4iScale(vec4i_t a, i32 s) {
+static Vec4i v4iScale(Vec4i a, i32 s) {
     return v4i(a.x * s, a.y * s, a.z * s, a.w * s);
 }
 
 // ----------- dot product ----------- //
 
-static f32 v2Dot(vec2_t a, vec2_t b) {
+static f32 v2Dot(Vec2 a, Vec2 b) {
     return a.x * b.x + a.y * b.y;
 }
 
-static f32 v3Dot(vec3_t a, vec3_t b) {
+static f32 v3Dot(Vec3 a, Vec3 b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-static f32 v4Dot(vec4_t a, vec4_t b) {
+static f32 v4Dot(Vec4 a, Vec4 b) {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
-static i32 v2iDot(vec2i_t a, vec2i_t b) {
+static i32 v2iDot(Vec2i a, Vec2i b) {
     return a.x * b.x + a.y * b.y;
 }
 
-static i32 v3iDot(vec3i_t a, vec3i_t b) {
+static i32 v3iDot(Vec3i a, Vec3i b) {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-static i32 v4iDot(vec4i_t a, vec4i_t b) {
+static i32 v4iDot(Vec4i a, Vec4i b) {
     return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 // ----------- length squared ----------- //
 
-static f32 v2LenSq(vec2_t u) {
+static f32 v2LenSq(Vec2 u) {
     return v2Dot(u, u);
 }
 
-static f32 v3LenSq(vec3_t u) {
+static f32 v3LenSq(Vec3 u) {
     return v3Dot(u, u);
 }
 
-static f32 v4LenSq(vec4_t u) {
+static f32 v4LenSq(Vec4 u) {
     return v4Dot(u, u);
 }
 
-static i32 v2iLenSq(vec2i_t u) {
+static i32 v2iLenSq(Vec2i u) {
     return v2iDot(u, u);
 }
 
-static i32 v3iLenSq(vec3i_t u) {
+static i32 v3iLenSq(Vec3i u) {
     return v3iDot(u, u);
 }
 
-static i32 v4iLenSq(vec4i_t u) {
+static i32 v4iLenSq(Vec4i u) {
     return v4iDot(u, u);
 }
 
 // -------------- length -------------- //
 
-static f32 v2Len(vec2_t u) {
+static f32 v2Len(Vec2 u) {
     return sqrt32(v2LenSq(u));
 }
 
-static f32 v3Len(vec3_t u) {
+static f32 v3Len(Vec3 u) {
     return sqrt32(v3LenSq(u));
 }
 
-static f32 v4Len(vec4_t u) {
+static f32 v4Len(Vec4 u) {
     return sqrt32(v4LenSq(u));
 }
 
 // -------------- distance squared -------------- //
 
-static f32 v2DistSq(vec2_t a, vec2_t b) {
+static f32 v2DistSq(Vec2 a, Vec2 b) {
     return v2LenSq(v2Sub(a, b));
 }
 
-static f32 v3DistSq(vec3_t a, vec3_t b) {
+static f32 v3DistSq(Vec3 a, Vec3 b) {
     return v3LenSq(v3Sub(a, b));
 }
 
-static f32 v4DistSq(vec4_t a, vec4_t b) {
+static f32 v4DistSq(Vec4 a, Vec4 b) {
     return v4LenSq(v4Sub(a, b));
 }
 
-static i32 v2iDistSq(vec2i_t a, vec2i_t b) {
+static i32 v2iDistSq(Vec2i a, Vec2i b) {
     return v2iLenSq(v2iSub(a, b));
 }
 
-static i32 v3iDistSq(vec3i_t a, vec3i_t b) {
+static i32 v3iDistSq(Vec3i a, Vec3i b) {
     return v3iLenSq(v3iSub(a, b));
 }
 
-static i32 v4iDistSq(vec4i_t a, vec4i_t b) {
+static i32 v4iDistSq(Vec4i a, Vec4i b) {
     return v4iLenSq(v4iSub(a, b));
 }
 
 // ------------------ distance ------------------- //
 
-static f32 v2Dist(vec2_t a, vec2_t b) {
+static f32 v2Dist(Vec2 a, Vec2 b) {
     return sqrt32(v2DistSq(a, b));
 }
 
-static f32 v3Dist(vec3_t a, vec3_t b) {
+static f32 v3Dist(Vec3 a, Vec3 b) {
     return sqrt32(v3DistSq(a, b));
 }
 
-static f32 v4Dist(vec4_t a, vec4_t b) {
+static f32 v4Dist(Vec4 a, Vec4 b) {
     return sqrt32(v4DistSq(a, b));
 }
 
 // -------------- manhattan distance -------------- //
 
-static i32 v2iManhattan(vec2i_t a, vec2i_t b) {
-    vec2i_t diff = v2iSub(a, b);
+static i32 v2iManhattan(Vec2i a, Vec2i b) {
+    Vec2i diff = v2iSub(a, b);
 
     return (0x7ffffffff & diff.x) + (0x7ffffffff & diff.y);
 }
 
-static i32 v3iManhattan(vec3i_t a, vec3i_t b) {
-    vec3i_t diff = v3iSub(a, b);
+static i32 v3iManhattan(Vec3i a, Vec3i b) {
+    Vec3i diff = v3iSub(a, b);
 
     return (0x7ffffffff & diff.x) + (0x7ffffffff & diff.y) + (0x7ffffffff & diff.z);
 }
 
 // -------------- normalize --------------- //
 
-static vec2_t v2Norm(vec2_t u) {
+static Vec2 v2Norm(Vec2 u) {
     return v2Scale(u, rsqrt32(v2Dot(u, u)));
 }
 
-static vec3_t v3Norm(vec3_t u) {
+static Vec3 v3Norm(Vec3 u) {
     return v3Scale(u, rsqrt32(v3Dot(u, u)));
 }
 
-static vec4_t v4Norm(vec4_t u) {
+static Vec4 v4Norm(Vec4 u) {
     return v4Scale(u, rsqrt32(v4Dot(u, u)));
 }
 
 // ---------------- min ----------------- //
 
-static vec2_t v2Min(vec2_t a, vec2_t b) {
+static Vec2 v2Min(Vec2 a, Vec2 b) {
     return v2(
         a.x < b.x? a.x : b.x,
         a.y < b.y? a.y : b.y);
 }
 
-static vec3_t v3Min(vec3_t a, vec3_t b) {
+static Vec3 v3Min(Vec3 a, Vec3 b) {
     return v3(
         a.x < b.x? a.x : b.x,
         a.y < b.y? a.y : b.y,
         a.z < b.z? a.z : b.z);
 }
 
-static vec4_t v4Min(vec4_t a, vec4_t b) {
+static Vec4 v4Min(Vec4 a, Vec4 b) {
     return v4(
         a.x < b.x? a.x : b.x,
         a.y < b.y? a.y : b.y,
@@ -764,20 +764,20 @@ static vec4_t v4Min(vec4_t a, vec4_t b) {
         a.w < b.w? a.w : b.w);
 }
 
-static vec2i_t v2iMin(vec2i_t a, vec2i_t b) {
+static Vec2i v2iMin(Vec2i a, Vec2i b) {
     return v2i(
         a.x < b.x? a.x : b.x,
         a.y < b.y? a.y : b.y);
 }
 
-static vec3i_t v3iMin(vec3i_t a, vec3i_t b) {
+static Vec3i v3iMin(Vec3i a, Vec3i b) {
     return v3i(
         a.x < b.x? a.x : b.x,
         a.y < b.y? a.y : b.y,
         a.z < b.z? a.z : b.z);
 }
 
-static vec4i_t v4iMin(vec4i_t a, vec4i_t b) {
+static Vec4i v4iMin(Vec4i a, Vec4i b) {
     return v4i(
         a.x < b.x? a.x : b.x,
         a.y < b.y? a.y : b.y,
@@ -787,34 +787,34 @@ static vec4i_t v4iMin(vec4i_t a, vec4i_t b) {
 
 // ----------- equal ------------ //
 
-static b32 v2iEqual(vec2i_t a, vec2i_t b) {
+static b32 v2iEqual(Vec2i a, Vec2i b) {
     return a.x == b.x && a.y == b.y;
 }
 
-static b32 v3iEqual(vec3i_t a, vec3i_t b) {
+static b32 v3iEqual(Vec3i a, Vec3i b) {
     return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-static b32 v4iEqual(vec4i_t a, vec4i_t b) {
+static b32 v4iEqual(Vec4i a, Vec4i b) {
     return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
 }
 
 // ---------------- max ----------------- //
 
-static vec2_t v2Max(vec2_t a, vec2_t b) {
+static Vec2 v2Max(Vec2 a, Vec2 b) {
     return v2(
         a.x > b.x? a.x : b.x,
         a.y > b.y? a.y : b.y);
 }
 
-static vec3_t v3Max(vec3_t a, vec3_t b) {
+static Vec3 v3Max(Vec3 a, Vec3 b) {
     return v3(
         a.x > b.x? a.x : b.x,
         a.y > b.y? a.y : b.y,
         a.z > b.z? a.z : b.z);
 }
 
-static vec4_t v4Max(vec4_t a, vec4_t b) {
+static Vec4 v4Max(Vec4 a, Vec4 b) {
     return v4(
         a.x > b.x? a.x : b.x,
         a.y > b.y? a.y : b.y,
@@ -822,20 +822,20 @@ static vec4_t v4Max(vec4_t a, vec4_t b) {
         a.w > b.w? a.w : b.w);
 }
 
-static vec2i_t v2iMax(vec2i_t a, vec2i_t b) {
+static Vec2i v2iMax(Vec2i a, Vec2i b) {
     return v2i(
         a.x > b.x? a.x : b.x,
         a.y > b.y? a.y : b.y);
 }
 
-static vec3i_t v3iMax(vec3i_t a, vec3i_t b) {
+static Vec3i v3iMax(Vec3i a, Vec3i b) {
     return v3i(
         a.x > b.x? a.x : b.x,
         a.y > b.y? a.y : b.y,
         a.z > b.z? a.z : b.z);
 }
 
-static vec4i_t v4iMax(vec4i_t a, vec4i_t b) {
+static Vec4i v4iMax(Vec4i a, Vec4i b) {
     return v4i(
         a.x > b.x? a.x : b.x,
         a.y > b.y? a.y : b.y,
@@ -845,18 +845,18 @@ static vec4i_t v4iMax(vec4i_t a, vec4i_t b) {
 
 // ---------------- lerp ----------------- //
 
-static vec2_t v2Lerp(vec2_t a, vec2_t b, f32 t) {
+static Vec2 v2Lerp(Vec2 a, Vec2 b, f32 t) {
     return v2(a.x + t * (b.x - a.x),
               a.y + t * (b.y - a.y));
 }
 
-static vec3_t v3Lerp(vec3_t a, vec3_t b, f32 t) {
+static Vec3 v3Lerp(Vec3 a, Vec3 b, f32 t) {
     return v3(a.x + t * (b.x - a.x),
               a.y + t * (b.y - a.y),
               a.z + t * (b.z - a.z));
 }
 
-static vec4_t v4Lerp(vec4_t a, vec4_t b, f32 t) {
+static Vec4 v4Lerp(Vec4 a, Vec4 b, f32 t) {
     return v4(a.x + t * (b.x - a.x),
               a.y + t * (b.y - a.y),
               a.z + t * (b.z - a.z),
@@ -865,7 +865,7 @@ static vec4_t v4Lerp(vec4_t a, vec4_t b, f32 t) {
 
 // --------------- cross ------------------- //
 
-static vec3_t v3Cross(vec3_t a, vec3_t b) {
+static Vec3 v3Cross(Vec3 a, Vec3 b) {
     return v3(
         a.y * b.z - a.z * b.y,
         a.z * b.x - a.x * b.z,
@@ -874,7 +874,7 @@ static vec3_t v3Cross(vec3_t a, vec3_t b) {
 
 // --------------- get angle ------------------- //
 
-static f32 v2GetAngle(vec2_t a, vec2_t b) {
+static f32 v2GetAngle(Vec2 a, Vec2 b) {
     f32 det = a.x * b.y - b.x * a.y;
     f32 dot = a.x * b.x + a.y * b.y;
 
@@ -883,21 +883,21 @@ static f32 v2GetAngle(vec2_t a, vec2_t b) {
 
 // ------------------ transform/scale/rotate ------------------ //
 
-static mat2_t m2Rotate(f32 angle) {
+static Mat2 m2Rotate(f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
     return m2(c, s, -s, c);
 }
 
-static mat3_t m3Rotate(vec3_t axis, f32 angle) {
+static Mat3 m3Rotate(Vec3 axis, f32 angle) {
     f32 c = cosf(angle);
     f32 s = sinf(angle);
 
     f32 k = 1.0f - c;
 
-    vec3_t sa   = { s * axis.x, s * axis.y, s * axis.z };
-    vec3_t omca = { k * axis.x, k * axis.y, k * axis.z };
+    Vec3 sa   = { s * axis.x, s * axis.y, s * axis.z };
+    Vec3 omca = { k * axis.x, k * axis.y, k * axis.z };
 
     return m3(
         omca.x * axis.x + c,
@@ -913,13 +913,13 @@ static mat3_t m3Rotate(vec3_t axis, f32 angle) {
         omca.z * axis.z + c);
 }
 
-static mat4_t m4Rotate(vec3_t axis, f32 angle) {
+static Mat4 m4Rotate(Vec3 axis, f32 angle) {
     f32 cosv = cosf(angle);
     f32 sinv = sinf(angle);
     f32 inv_cosv = 1.0f - cosv;
 
-    vec3_t sa   = { axis.x * sinv,      axis.y * sinv,      axis.z * sinv };
-    vec3_t omca = { axis.x * inv_cosv,  axis.y * inv_cosv,  axis.z * inv_cosv };
+    Vec3 sa   = { axis.x * sinv,      axis.y * sinv,      axis.z * sinv };
+    Vec3 omca = { axis.x * inv_cosv,  axis.y * inv_cosv,  axis.z * inv_cosv };
 
     return m4(
         omca.x * axis.x + cosv,  omca.x * axis.y - sa.x,  omca.x * axis.z + sa.y, 0,
@@ -928,14 +928,14 @@ static mat4_t m4Rotate(vec3_t axis, f32 angle) {
         0,  0,  0,  1);
 }
 
-static quat_t quatRotate(vec3_t axis, f32 angle) {
-    f32    s = sinf(0.5f * angle);
-    vec3_t v = { s * axis.x, s * axis.y, s * axis.z };
+static Quat quatRotate(Vec3 axis, f32 angle) {
+    f32  s = sinf(0.5f * angle);
+    Vec3 v = { s * axis.x, s * axis.y, s * axis.z };
 
     return quat(v.x, v.y, v.z, cosf(0.5f * angle));
 }
 
-static mat4_t m4_translate(f32 x, f32 y, f32 z) {
+static Mat4 m4_translate(f32 x, f32 y, f32 z) {
     return m4(
         1, 0, 0, 0,
         0, 1, 0, 0,
@@ -943,7 +943,7 @@ static mat4_t m4_translate(f32 x, f32 y, f32 z) {
         x, y, z, 1);
 }
 
-static mat4_t m4Scale(f32 x, f32 y, f32 z) {
+static Mat4 m4Scale(f32 x, f32 y, f32 z) {
     return m4(
         x, 0, 0, 0,
         0, y, 0, 0,
@@ -953,7 +953,7 @@ static mat4_t m4Scale(f32 x, f32 y, f32 z) {
 
 // --------------- view matricies --------------- //
 
-static mat4_t m4Ortho(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f) {
+static Mat4 m4Ortho(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f) {
     return m4(
         2 / (r - l),            0,                      0,                      0,
         0,                      2 / (t - b),            0,                      0,
@@ -961,7 +961,7 @@ static mat4_t m4Ortho(f32 l, f32 r, f32 b, f32 t, f32 n, f32 f) {
         -(r + l) / (r - l),     -(t + b) / (t - b),     -(f + n) / (f - n),     1);
 }
 
-static mat4_t m4Perspective(f32 y_fov, f32 aspect, f32 n, f32 f) {
+static Mat4 m4Perspective(f32 y_fov, f32 aspect, f32 n, f32 f) {
     f32 a = 1.0f / tanf(y_fov / 2.0f);
 
     return m4(
@@ -971,12 +971,12 @@ static mat4_t m4Perspective(f32 y_fov, f32 aspect, f32 n, f32 f) {
         0,              0,      -((2 * f * n) / (f - n)),   0);
 }
 
-static mat4_t m4LookAt(vec3_t eye, vec3_t center, vec3_t up) {
-    vec3_t f = v3Norm(v3(center.x - eye.x, center.y - eye.y, center.z - eye.z));
-    vec3_t s = v3Norm(v3Cross(f, up));
-    vec3_t t = v3Cross(s, f);
+static Mat4 m4LookAt(Vec3 eye, Vec3 center, Vec3 up) {
+    Vec3 f = v3Norm(v3(center.x - eye.x, center.y - eye.y, center.z - eye.z));
+    Vec3 s = v3Norm(v3Cross(f, up));
+    Vec3 t = v3Cross(s, f);
 
-    mat4_t m = {0};
+    Mat4 m = {0};
 
 	m.e[0]  =  s.x;
 	m.e[1]  =  t.x;
@@ -1003,7 +1003,7 @@ static mat4_t m4LookAt(vec3_t eye, vec3_t center, vec3_t up) {
 
 // ----------------- plane/frustrum ------------------- //
 
-static plane_t normalizePlane(plane_t plane) {
+static Plane normalizePlane(Plane plane) {
     f32 mag = sqrt32(plane.a * plane.a + plane.b * plane.b + plane.c * plane.c);
 
     plane.a = plane.a / mag;
@@ -1014,8 +1014,8 @@ static plane_t normalizePlane(plane_t plane) {
     return plane;
 }
 
-static frustum_t createFrustum(mat4_t m, b32 normalize) {
-    frustum_t frustum = {0};
+static Frustum createFrustum(Mat4 m, b32 normalize) {
+    Frustum frustum = {0};
 
     // left clipping plane
     frustum.plane[0].a = m.e[3]  + m.e[0];
@@ -1067,24 +1067,24 @@ static frustum_t createFrustum(mat4_t m, b32 normalize) {
 
 // ------------------ contains ------------------ //
 
-static b32 contains(circle_t circle, vec2_t pos) {
+static b32 contains(Circle circle, Vec2 pos) {
     // TODO:
     return false;
 }
 
-static b32 contains(sphere_t sphere, vec3_t pos) {
+static b32 contains(Sphere sphere, Vec3 pos) {
     // TODO:
     return false;
 }
 
-static b32 contains(rect2_t rect, vec2_t pos) {
+static b32 contains(Rect2 rect, Vec2 pos) {
     if (pos.x < rect.min.x || pos.x > rect.max.x) return false;
     if (pos.y < rect.min.y || pos.y > rect.max.y) return false;
 
     return true;
 }
 
-static b32 contains(rect3_t rect, vec3_t pos) {
+static b32 contains(Rect3 rect, Vec3 pos) {
     if (pos.x < rect.min.x || pos.x > rect.max.x) return false;
     if (pos.y < rect.min.y || pos.y > rect.max.y) return false;
     if (pos.z < rect.min.z || pos.z > rect.max.z) return false;
@@ -1092,14 +1092,14 @@ static b32 contains(rect3_t rect, vec3_t pos) {
     return true;
 }
 
-static b32 contains(rect2i_t rect, vec2i_t pos) {
+static b32 contains(Rect2i rect, Vec2i pos) {
     if (pos.x < rect.min.x || pos.x > rect.max.x) return false;
     if (pos.y < rect.min.y || pos.y > rect.max.y) return false;
 
     return true;
 }
 
-static b32 contains(rect3i_t rect, vec3i_t pos) {
+static b32 contains(Rect3i rect, Vec3i pos) {
     if (pos.x < rect.min.x || pos.x > rect.max.x) return false;
     if (pos.y < rect.min.y || pos.y > rect.max.y) return false;
     if (pos.z < rect.min.z || pos.z > rect.max.z) return false;
@@ -1107,7 +1107,7 @@ static b32 contains(rect3i_t rect, vec3i_t pos) {
     return true;
 }
 
-static b32 contains(frustum_t frustum, vec3_t pos) {
+static b32 contains(Frustum frustum, Vec3 pos) {
     for (i32 i = 0; i < 6; i++) {
 		if (frustum.plane[i].a * pos.x + frustum.plane[i].b * pos.y + frustum.plane[i].c * pos.z + frustum.plane[i].d <= 0)
 			return false;
@@ -1118,7 +1118,7 @@ static b32 contains(frustum_t frustum, vec3_t pos) {
 
 // ------------------ intersect ------------------ //
 
-static b32 intersect(circle_t a, circle_t b) {
+static b32 intersect(Circle a, Circle b) {
     f32 dx  = b.pos.x - a.pos.x;
     f32 dy  = b.pos.y - a.pos.y;
     f32 rt  = a.rad + b.rad;
@@ -1126,7 +1126,7 @@ static b32 intersect(circle_t a, circle_t b) {
     return (dx * dx + dy * dy) < (rt * rt);
 }
 
-static b32 intersect(sphere_t a, sphere_t b) {
+static b32 intersect(Sphere a, Sphere b) {
     f32 dx  = b.pos.x - a.pos.x;
     f32 dy  = b.pos.y - a.pos.y;
     f32 dz  = b.pos.z - a.pos.z;
@@ -1136,29 +1136,14 @@ static b32 intersect(sphere_t a, sphere_t b) {
     return (dx * dx + dy * dy) < (rt * rt);
 }
 
-static b32 intersect(rect2_t a, rect2_t b) {
+static b32 intersect(Rect2 a, Rect2 b) {
     if (a.min.x > b.max.x || a.max.x < b.min.x) return false;
     if (a.min.y > b.max.y || a.max.y < b.min.y) return false;
 
     return true;
 }
 
-static b32 intersect(rect3_t a, rect3_t b) {
-    if (a.min.x > b.max.x || a.max.x < b.min.x) return false;
-    if (a.min.y > b.max.y || a.max.y < b.min.y) return false;
-    if (a.min.z > b.max.z || a.max.z < b.min.z) return false;
-
-    return true;
-}
-
-static b32 intersect(rect2i_t a, rect2i_t b) {
-    if (a.min.x > b.max.x || a.max.x < b.min.x) return false;
-    if (a.min.y > b.max.y || a.max.y < b.min.y) return false;
-
-    return true;
-}
-
-static b32 intersect(rect3i_t a, rect3i_t b) {
+static b32 intersect(Rect3 a, Rect3 b) {
     if (a.min.x > b.max.x || a.max.x < b.min.x) return false;
     if (a.min.y > b.max.y || a.max.y < b.min.y) return false;
     if (a.min.z > b.max.z || a.max.z < b.min.z) return false;
@@ -1166,7 +1151,22 @@ static b32 intersect(rect3i_t a, rect3i_t b) {
     return true;
 }
 
-static b32 intersect(frustum_t frustum, sphere_t sphere) {
+static b32 intersect(Rect2i a, Rect2i b) {
+    if (a.min.x > b.max.x || a.max.x < b.min.x) return false;
+    if (a.min.y > b.max.y || a.max.y < b.min.y) return false;
+
+    return true;
+}
+
+static b32 intersect(Rect3i a, Rect3i b) {
+    if (a.min.x > b.max.x || a.max.x < b.min.x) return false;
+    if (a.min.y > b.max.y || a.max.y < b.min.y) return false;
+    if (a.min.z > b.max.z || a.max.z < b.min.z) return false;
+
+    return true;
+}
+
+static b32 intersect(Frustum frustum, Sphere sphere) {
     for (i32 i = 0; i < 6; i++) {
 		if(frustum.plane[i].a * sphere.pos.x + frustum.plane[i].b * sphere.pos.y + frustum.plane[i].c * sphere.pos.z + frustum.plane[i].d <= -sphere.rad) {
 			return false;
@@ -1176,7 +1176,7 @@ static b32 intersect(frustum_t frustum, sphere_t sphere) {
 	return true;
 }
 
-static b32 intersect(frustum_t frustum, rect3_t rect) {
+static b32 intersect(Frustum frustum, Rect3 rect) {
     for (int i = 0; i < 6; i++) {
 		if (frustum.plane[i].a * rect.min.x + frustum.plane[i].b * rect.min.y + frustum.plane[i].c * rect.min.z + frustum.plane[i].d > 0) continue;
 		if (frustum.plane[i].a * rect.max.x + frustum.plane[i].b * rect.min.y + frustum.plane[i].c * rect.min.z + frustum.plane[i].d > 0) continue;
@@ -1195,8 +1195,8 @@ static b32 intersect(frustum_t frustum, rect3_t rect) {
 
 // ------------------- get overlap --------------- //
 
-static rect2_t getOverlap(rect2_t a, rect2_t b) {
-    rect2_t result = {
+static Rect2 getOverlap(Rect2 a, Rect2 b) {
+    Rect2 result = {
         v2Max(a.min, b.min),
         v2Min(a.max, b.max),
     };
@@ -1204,8 +1204,8 @@ static rect2_t getOverlap(rect2_t a, rect2_t b) {
     return result;
 }
 
-static rect3_t getOverlap(rect3_t a, rect3_t b) {
-    rect3_t result = {
+static Rect3 getOverlap(Rect3 a, Rect3 b) {
+    Rect3 result = {
         v3Max(a.min, b.min),
         v3Min(a.max, b.max),
     };
@@ -1213,8 +1213,8 @@ static rect3_t getOverlap(rect3_t a, rect3_t b) {
     return result;
 }
 
-static rect2i_t getOverlap(rect2i_t a, rect2i_t b) {
-    rect2i_t result = {
+static Rect2i getOverlap(Rect2i a, Rect2i b) {
+    Rect2i result = {
         v2iMax(a.min, b.min),
         v2iMin(a.max, b.max),
     };
@@ -1222,8 +1222,8 @@ static rect2i_t getOverlap(rect2i_t a, rect2i_t b) {
     return result;
 }
 
-static rect3i_t getOverlap(rect3i_t a, rect3i_t b) {
-    rect3i_t result = {
+static Rect3i getOverlap(Rect3i a, Rect3i b) {
+    Rect3i result = {
         v3iMax(a.min, b.min),
         v3iMin(a.max, b.max),
     };
@@ -1233,22 +1233,22 @@ static rect3i_t getOverlap(rect3i_t a, rect3i_t b) {
 
 // -------------- get intersect vector ---------- //
 
-static vec2_t getIntersectVector(circle_t a, circle_t b) {
-    vec2_t  delta = { a.pos.x - b.pos.x, a.pos.y - b.pos.y };
+static Vec2 getIntersectVector(Circle a, Circle b) {
+    Vec2  delta = { a.pos.x - b.pos.x, a.pos.y - b.pos.y };
     f32     depth = v2Len(delta) - (a.rad + b.rad);
     
     return v2(-depth * delta.x, -depth * delta.y);
 }
 
-static vec3_t getIntersectVector(sphere_t a, sphere_t b) {
-    vec3_t  delta = { b.pos.x - a.pos.x, b.pos.y - a.pos.y, b.pos.z - a.pos.z };
+static Vec3 getIntersectVector(Sphere a, Sphere b) {
+    Vec3  delta = { b.pos.x - a.pos.x, b.pos.y - a.pos.y, b.pos.z - a.pos.z };
     f32     depth = v3Len(delta) - (a.rad + b.rad);
     
     return v3(-depth * delta.x, -depth * delta.y, -depth * delta.z);
 }
 
-static vec2_t getIntersectVector(rect2_t a, rect2_t b) {
-    rect2_t o  = getOverlap(a, b);
+static Vec2 getIntersectVector(Rect2 a, Rect2 b) {
+    Rect2 o = getOverlap(a, b);
 
     f32 dx = 0.5f * (a.min.x + a.max.x) - 0.5f * (b.min.x + b.max.x);
     f32 dy = 0.5f * (a.min.y + a.max.y) - 0.5f * (b.min.y + b.max.y);
@@ -1258,8 +1258,8 @@ static vec2_t getIntersectVector(rect2_t a, rect2_t b) {
         SIGN(dy) * (o.max.y - o.min.y));
 }
 
-static vec3_t getIntersectVector(rect3_t a, rect3_t b) {
-    rect3_t o = getOverlap(a, b);
+static Vec3 getIntersectVector(Rect3 a, Rect3 b) {
+    Rect3 o = getOverlap(a, b);
 
     f32 dx = 0.5f * (a.min.x + a.max.x) - 0.5f * (b.min.x + b.max.x);
     f32 dy = 0.5f * (a.min.y + a.max.y) - 0.5f * (b.min.y + b.max.y);
@@ -1271,8 +1271,8 @@ static vec3_t getIntersectVector(rect3_t a, rect3_t b) {
         SIGN(dz) * (o.max.z - o.min.z));
 }
 
-static vec2i_t getIntersectVector(rect2i_t a, rect2i_t b) {
-    rect2i_t o = getOverlap(a, b);
+static Vec2i getIntersectVector(Rect2i a, Rect2i b) {
+    Rect2i o = getOverlap(a, b);
 
     i32  dx = (a.min.x + a.max.x) / 2 - (b.min.x + b.max.x) / 2;
     i32  dy = (a.min.y + a.max.y) / 2 - (b.min.y + b.max.y) / 2;
@@ -1282,8 +1282,8 @@ static vec2i_t getIntersectVector(rect2i_t a, rect2i_t b) {
         SIGN(dy) * (o.max.y - o.min.y));
 }
 
-static vec3i_t getIntersectVector(rect3i_t a, rect3i_t b) {
-    rect3i_t o = getOverlap(a, b);
+static Vec3i getIntersectVector(Rect3i a, Rect3i b) {
+    Rect3i o = getOverlap(a, b);
 
     i32 dx = (a.min.x + a.max.x) / 2 - (b.min.x + b.max.x) / 2;
     i32 dy = (a.min.y + a.max.y) / 2 - (b.min.y + b.max.y) / 2;
@@ -1315,21 +1315,21 @@ static f32 randF32(u32* state, f32 min, f32 max) {
     return min + ((f32)randU32(state) / (f32)0xFFFFFFFF) * (max - min); 
 }
 
-static vec2_t randUnitVec2(u32* state) {
-    vec2_t out = { randF32(state, -1, 1), randF32(state, -1, 1) };
+static Vec2 randUnitVec2(u32* state) {
+    Vec2 out = { randF32(state, -1, 1), randF32(state, -1, 1) };
     return v2Norm(out);
 }
 
-static vec3_t randUnitVec3(u32* state) {
-    vec3_t out = { randF32(state, -1, 1), randF32(state, -1, 1), randF32(state, -1, 1) };
+static Vec3 randUnitVec3(u32* state) {
+    Vec3 out = { randF32(state, -1, 1), randF32(state, -1, 1), randF32(state, -1, 1) };
     return v3Norm(out);
 }
 
-static vec2_t randVec2(u32* state, f32 min, f32 max) {
+static Vec2 randVec2(u32* state, f32 min, f32 max) {
     return v2Scale(randUnitVec2(state), randF32(state, min, max));
 }
 
-static vec3_t randVec3(u32* state, f32 min, f32 max) {
+static Vec3 randVec3(u32* state, f32 min, f32 max) {
     return v3Scale(randUnitVec3(state), randF32(state, min, max));
 }
 
@@ -1413,14 +1413,14 @@ static u32 hashMem(const void *data, u32 size) {
 #define HASH_PRIME2 4280703257u
 #define HASH_PRIME3 1609059329u
 
-static u32 hashVec2i(vec2i_t k) {
+static u32 hashVec2i(Vec2i k) {
     u32 a = hashI32(k.x);
     u32 b = hashI32(k.y);
 
     return (a * HASH_PRIME0) ^ (b * HASH_PRIME1);
 }
 
-static u32 hashVec3i(vec3i_t k) {
+static u32 hashVec3i(Vec3i k) {
     u32 a = hashI32(k.x);
     u32 b = hashI32(k.y);
     u32 c = hashI32(k.z);
@@ -1428,7 +1428,7 @@ static u32 hashVec3i(vec3i_t k) {
     return (a * HASH_PRIME0) ^ (b * HASH_PRIME1) ^ (c * HASH_PRIME2);
 }
 
-static u32 hashVec4i(vec4i_t k) {
+static u32 hashVec4i(Vec4i k) {
     u32 a = hashI32(k.x);
     u32 b = hashI32(k.y);
     u32 c = hashI32(k.z);
@@ -1454,11 +1454,11 @@ static u32 packColorF32(f32 r, f32 g, f32 b, f32 a) {
     return packColorU8((u8)(255 * r), (u8)(255 * g), (u8)(255 * b), (u8)(255 * a));
 }
 
-static u32 packColorVec4(vec4_t color) {
+static u32 packColorVec4(Vec4 color) {
     return packColorF32(color.r, color.g, color.b, color.a);
 }
 
-static u32 packColorVec3(vec3_t color, f32 a = 1.0f) {
+static u32 packColorVec3(Vec3 color, f32 a = 1.0f) {
     return packColorF32(color.r, color.g, color.b, a);
 }
 
@@ -1622,147 +1622,147 @@ static b32 f4x4_unproject_64(f64* result, f64 winx, f64 winy, f64 winz, f64* mod
 
 // -------- add -------- //
 
-static vec2_t operator+(vec2_t a, vec2_t b) { return v2Add(a, b); }
-static vec3_t operator+(vec3_t a, vec3_t b) { return v3Add(a, b); }
-static vec4_t operator+(vec4_t a, vec4_t b) { return v4Add(a, b); }
+static Vec2 operator+(Vec2 a, Vec2 b) { return v2Add(a, b); }
+static Vec3 operator+(Vec3 a, Vec3 b) { return v3Add(a, b); }
+static Vec4 operator+(Vec4 a, Vec4 b) { return v4Add(a, b); }
 
-static vec2i_t operator+(vec2i_t a, vec2i_t b) { return v2iAdd(a, b); }
-static vec3i_t operator+(vec3i_t a, vec3i_t b) { return v3iAdd(a, b); }
-static vec4i_t operator+(vec4i_t a, vec4i_t b) { return v4iAdd(a, b); }
+static Vec2i operator+(Vec2i a, Vec2i b) { return v2iAdd(a, b); }
+static Vec3i operator+(Vec3i a, Vec3i b) { return v3iAdd(a, b); }
+static Vec4i operator+(Vec4i a, Vec4i b) { return v4iAdd(a, b); }
 
-static vec2_t operator+=(vec2_t& a, vec2_t b) { a = a + b; return a; }
-static vec3_t operator+=(vec3_t& a, vec3_t b) { a = a + b; return a; }
-static vec4_t operator+=(vec4_t& a, vec4_t b) { a = a + b; return a; }
+static Vec2 operator+=(Vec2& a, Vec2 b) { a = a + b; return a; }
+static Vec3 operator+=(Vec3& a, Vec3 b) { a = a + b; return a; }
+static Vec4 operator+=(Vec4& a, Vec4 b) { a = a + b; return a; }
 
-static vec2i_t operator+=(vec2i_t& a, vec2i_t b) { a = a + b; return a; }
-static vec3i_t operator+=(vec3i_t& a, vec3i_t b) { a = a + b; return a; }
-static vec4i_t operator+=(vec4i_t& a, vec4i_t b) { a = a + b; return a; }
+static Vec2i operator+=(Vec2i& a, Vec2i b) { a = a + b; return a; }
+static Vec3i operator+=(Vec3i& a, Vec3i b) { a = a + b; return a; }
+static Vec4i operator+=(Vec4i& a, Vec4i b) { a = a + b; return a; }
 
 // -------- sub -------- //
 
-static vec2_t operator-(vec2_t a) { return v2Neg(a); }
-static vec3_t operator-(vec3_t a) { return v3Neg(a); }
-static vec4_t operator-(vec4_t a) { return v4Neg(a); }
+static Vec2 operator-(Vec2 a) { return v2Neg(a); }
+static Vec3 operator-(Vec3 a) { return v3Neg(a); }
+static Vec4 operator-(Vec4 a) { return v4Neg(a); }
 
-static vec2i_t operator-(vec2i_t a) { return v2iNeg(a); }
-static vec3i_t operator-(vec3i_t a) { return v3iNeg(a); }
-static vec4i_t operator-(vec4i_t a) { return v4iNeg(a); }
+static Vec2i operator-(Vec2i a) { return v2iNeg(a); }
+static Vec3i operator-(Vec3i a) { return v3iNeg(a); }
+static Vec4i operator-(Vec4i a) { return v4iNeg(a); }
 
-static vec2_t operator-(vec2_t a, vec2_t b) { return v2Sub(a, b); }
-static vec3_t operator-(vec3_t a, vec3_t b) { return v3Sub(a, b); }
-static vec4_t operator-(vec4_t a, vec4_t b) { return v4Sub(a, b); }
+static Vec2 operator-(Vec2 a, Vec2 b) { return v2Sub(a, b); }
+static Vec3 operator-(Vec3 a, Vec3 b) { return v3Sub(a, b); }
+static Vec4 operator-(Vec4 a, Vec4 b) { return v4Sub(a, b); }
 
-static vec2i_t operator-(vec2i_t a, vec2i_t b) { return v2iSub(a, b); }
-static vec3i_t operator-(vec3i_t a, vec3i_t b) { return v3iSub(a, b); }
-static vec4i_t operator-(vec4i_t a, vec4i_t b) { return v4iSub(a, b); }
+static Vec2i operator-(Vec2i a, Vec2i b) { return v2iSub(a, b); }
+static Vec3i operator-(Vec3i a, Vec3i b) { return v3iSub(a, b); }
+static Vec4i operator-(Vec4i a, Vec4i b) { return v4iSub(a, b); }
 
-static vec2_t operator-=(vec2_t& a, vec2_t b) { a = a - b; return a; }
-static vec3_t operator-=(vec3_t& a, vec3_t b) { a = a - b; return a; }
-static vec4_t operator-=(vec4_t& a, vec4_t b) { a = a - b; return a; }
+static Vec2 operator-=(Vec2& a, Vec2 b) { a = a - b; return a; }
+static Vec3 operator-=(Vec3& a, Vec3 b) { a = a - b; return a; }
+static Vec4 operator-=(Vec4& a, Vec4 b) { a = a - b; return a; }
 
-static vec2i_t operator-=(vec2i_t& a, vec2i_t b) { a = a - b; return a; }
-static vec3i_t operator-=(vec3i_t& a, vec3i_t b) { a = a - b; return a; }
-static vec4i_t operator-=(vec4i_t& a, vec4i_t b) { a = a - b; return a; }
+static Vec2i operator-=(Vec2i& a, Vec2i b) { a = a - b; return a; }
+static Vec3i operator-=(Vec3i& a, Vec3i b) { a = a - b; return a; }
+static Vec4i operator-=(Vec4i& a, Vec4i b) { a = a - b; return a; }
 
 // -------- mul -------- //
 
-static vec2_t operator*(vec2_t a, vec2_t b) { return v2Mul(a, b); }
-static vec3_t operator*(vec3_t a, vec3_t b) { return v3Mul(a, b); }
-static vec4_t operator*(vec4_t a, vec4_t b) { return v4Mul(a, b); }
+static Vec2 operator*(Vec2 a, Vec2 b) { return v2Mul(a, b); }
+static Vec3 operator*(Vec3 a, Vec3 b) { return v3Mul(a, b); }
+static Vec4 operator*(Vec4 a, Vec4 b) { return v4Mul(a, b); }
 
-static vec2i_t operator*(vec2i_t a, vec2i_t b) { return v2iMul(a, b); }
-static vec3i_t operator*(vec3i_t a, vec3i_t b) { return v3iMul(a, b); }
-static vec4i_t operator*(vec4i_t a, vec4i_t b) { return v4iMul(a, b); }
+static Vec2i operator*(Vec2i a, Vec2i b) { return v2iMul(a, b); }
+static Vec3i operator*(Vec3i a, Vec3i b) { return v3iMul(a, b); }
+static Vec4i operator*(Vec4i a, Vec4i b) { return v4iMul(a, b); }
 
-static mat2_t operator*(mat2_t a, mat2_t b) { return m2Mul(a, b); }
-static mat3_t operator*(mat3_t a, mat3_t b) { return m3Mul(a, b); }
-static mat4_t operator*(mat4_t a, mat4_t b) { return m4Mul(a, b); }
+static Mat2 operator*(Mat2 a, Mat2 b) { return m2Mul(a, b); }
+static Mat3 operator*(Mat3 a, Mat3 b) { return m3Mul(a, b); }
+static Mat4 operator*(Mat4 a, Mat4 b) { return m4Mul(a, b); }
 
-static vec2_t operator*(mat2_t a, vec2_t b) { return m2Mul(a, b); }
-static vec3_t operator*(mat3_t a, vec3_t b) { return m3Mul(a, b); }
-static vec4_t operator*(mat4_t a, vec4_t b) { return m4Mul(a, b); }
+static Vec2 operator*(Mat2 a, Vec2 b) { return m2Mul(a, b); }
+static Vec3 operator*(Mat3 a, Vec3 b) { return m3Mul(a, b); }
+static Vec4 operator*(Mat4 a, Vec4 b) { return m4Mul(a, b); }
 
-static vec2_t operator*=(vec2_t& a, vec2_t b) { a = a * b; return a; }
-static vec3_t operator*=(vec3_t& a, vec3_t b) { a = a * b; return a; }
-static vec4_t operator*=(vec4_t& a, vec4_t b) { a = a * b; return a; }
+static Vec2 operator*=(Vec2& a, Vec2 b) { a = a * b; return a; }
+static Vec3 operator*=(Vec3& a, Vec3 b) { a = a * b; return a; }
+static Vec4 operator*=(Vec4& a, Vec4 b) { a = a * b; return a; }
 
-static vec2i_t operator*=(vec2i_t& a, vec2i_t b) { a = a * b; return a; }
-static vec3i_t operator*=(vec3i_t& a, vec3i_t b) { a = a * b; return a; }
-static vec4i_t operator*=(vec4i_t& a, vec4i_t b) { a = a * b; return a; }
+static Vec2i operator*=(Vec2i& a, Vec2i b) { a = a * b; return a; }
+static Vec3i operator*=(Vec3i& a, Vec3i b) { a = a * b; return a; }
+static Vec4i operator*=(Vec4i& a, Vec4i b) { a = a * b; return a; }
 
 // -------- scale -------- //
 
-static vec2_t operator*(vec2_t a, f32 s) { return v2Scale(a, s); }
-static vec3_t operator*(vec3_t a, f32 s) { return v3Scale(a, s); }
-static vec4_t operator*(vec4_t a, f32 s) { return v4Scale(a, s); }
-static vec2_t operator*(f32 s, vec2_t a) { return v2Scale(a, s); }
-static vec3_t operator*(f32 s, vec3_t a) { return v3Scale(a, s); }
-static vec4_t operator*(f32 s, vec4_t a) { return v4Scale(a, s); }
+static Vec2 operator*(Vec2 a, f32 s) { return v2Scale(a, s); }
+static Vec3 operator*(Vec3 a, f32 s) { return v3Scale(a, s); }
+static Vec4 operator*(Vec4 a, f32 s) { return v4Scale(a, s); }
+static Vec2 operator*(f32 s, Vec2 a) { return v2Scale(a, s); }
+static Vec3 operator*(f32 s, Vec3 a) { return v3Scale(a, s); }
+static Vec4 operator*(f32 s, Vec4 a) { return v4Scale(a, s); }
 
-static vec2i_t operator*(vec2i_t a, i32 s) { return v2iScale(a, s); }
-static vec3i_t operator*(vec3i_t a, i32 s) { return v3iScale(a, s); }
-static vec4i_t operator*(vec4i_t a, i32 s) { return v4iScale(a, s); }
-static vec2i_t operator*(i32 s, vec2i_t a) { return v2iScale(a, s); }
-static vec3i_t operator*(i32 s, vec3i_t a) { return v3iScale(a, s); }
-static vec4i_t operator*(i32 s, vec4i_t a) { return v4iScale(a, s); }
+static Vec2i operator*(Vec2i a, i32 s) { return v2iScale(a, s); }
+static Vec3i operator*(Vec3i a, i32 s) { return v3iScale(a, s); }
+static Vec4i operator*(Vec4i a, i32 s) { return v4iScale(a, s); }
+static Vec2i operator*(i32 s, Vec2i a) { return v2iScale(a, s); }
+static Vec3i operator*(i32 s, Vec3i a) { return v3iScale(a, s); }
+static Vec4i operator*(i32 s, Vec4i a) { return v4iScale(a, s); }
 
-static vec2_t operator*=(vec2_t& a, f32 b) { a = a * b; return a; }
-static vec3_t operator*=(vec3_t& a, f32 b) { a = a * b; return a; }
-static vec4_t operator*=(vec4_t& a, f32 b) { a = a * b; return a; }
+static Vec2 operator*=(Vec2& a, f32 b) { a = a * b; return a; }
+static Vec3 operator*=(Vec3& a, f32 b) { a = a * b; return a; }
+static Vec4 operator*=(Vec4& a, f32 b) { a = a * b; return a; }
 
-static vec2i_t operator*=(vec2i_t& a, i32 b) { a = a * b; return a; }
-static vec3i_t operator*=(vec3i_t& a, i32 b) { a = a * b; return a; }
-static vec4i_t operator*=(vec4i_t& a, i32 b) { a = a * b; return a; }
+static Vec2i operator*=(Vec2i& a, i32 b) { a = a * b; return a; }
+static Vec3i operator*=(Vec3i& a, i32 b) { a = a * b; return a; }
+static Vec4i operator*=(Vec4i& a, i32 b) { a = a * b; return a; }
 
 // -------- div -------- //
 
-static vec2_t operator/(vec2_t a, vec2_t b) { return v2Div(a, b); }
-static vec3_t operator/(vec3_t a, vec3_t b) { return v3Div(a, b); }
-static vec4_t operator/(vec4_t a, vec4_t b) { return v4Div(a, b); }
+static Vec2 operator/(Vec2 a, Vec2 b) { return v2Div(a, b); }
+static Vec3 operator/(Vec3 a, Vec3 b) { return v3Div(a, b); }
+static Vec4 operator/(Vec4 a, Vec4 b) { return v4Div(a, b); }
 
-static vec2i_t operator/(vec2i_t a, vec2i_t b) { return v2iDiv(a, b); }
-static vec3i_t operator/(vec3i_t a, vec3i_t b) { return v3iDiv(a, b); }
-static vec4i_t operator/(vec4i_t a, vec4i_t b) { return v4iDiv(a, b); }
+static Vec2i operator/(Vec2i a, Vec2i b) { return v2iDiv(a, b); }
+static Vec3i operator/(Vec3i a, Vec3i b) { return v3iDiv(a, b); }
+static Vec4i operator/(Vec4i a, Vec4i b) { return v4iDiv(a, b); }
 
-static vec2_t operator/(vec2_t a, f32 s) { return v2Div(a, v2(s, s)); }
-static vec3_t operator/(vec3_t a, f32 s) { return v3Div(a, v3(s, s, s)); }
-static vec4_t operator/(vec4_t a, f32 s) { return v4Div(a, v4(s, s, s, s)); }
-static vec2_t operator/(f32 s, vec2_t a) { return v2Div(a, v2(s, s)); }
-static vec3_t operator/(f32 s, vec3_t a) { return v3Div(a, v3(s, s, s)); }
-static vec4_t operator/(f32 s, vec4_t a) { return v4Div(a, v4(s, s, s, s)); }
+static Vec2 operator/(Vec2 a, f32 s) { return v2Div(a, v2(s, s)); }
+static Vec3 operator/(Vec3 a, f32 s) { return v3Div(a, v3(s, s, s)); }
+static Vec4 operator/(Vec4 a, f32 s) { return v4Div(a, v4(s, s, s, s)); }
+static Vec2 operator/(f32 s, Vec2 a) { return v2Div(a, v2(s, s)); }
+static Vec3 operator/(f32 s, Vec3 a) { return v3Div(a, v3(s, s, s)); }
+static Vec4 operator/(f32 s, Vec4 a) { return v4Div(a, v4(s, s, s, s)); }
 
-static vec2i_t operator/(vec2i_t a, i32 s) { return v2iDiv(a, v2i(s, s)); }
-static vec3i_t operator/(vec3i_t a, i32 s) { return v3iDiv(a, v3i(s, s, s)); }
-static vec4i_t operator/(vec4i_t a, i32 s) { return v4iDiv(a, v4i(s, s, s, s)); }
-static vec2i_t operator/(i32 s, vec2i_t a) { return v2iDiv(a, v2i(s, s)); }
-static vec3i_t operator/(i32 s, vec3i_t a) { return v3iDiv(a, v3i(s, s, s)); }
-static vec4i_t operator/(i32 s, vec4i_t a) { return v4iDiv(a, v4i(s, s, s, s)); }
+static Vec2i operator/(Vec2i a, i32 s) { return v2iDiv(a, v2i(s, s)); }
+static Vec3i operator/(Vec3i a, i32 s) { return v3iDiv(a, v3i(s, s, s)); }
+static Vec4i operator/(Vec4i a, i32 s) { return v4iDiv(a, v4i(s, s, s, s)); }
+static Vec2i operator/(i32 s, Vec2i a) { return v2iDiv(a, v2i(s, s)); }
+static Vec3i operator/(i32 s, Vec3i a) { return v3iDiv(a, v3i(s, s, s)); }
+static Vec4i operator/(i32 s, Vec4i a) { return v4iDiv(a, v4i(s, s, s, s)); }
 
-static vec2_t operator/=(vec2_t& a, vec2_t b) { a = a / b; return a; }
-static vec3_t operator/=(vec3_t& a, vec3_t b) { a = a / b; return a; }
-static vec4_t operator/=(vec4_t& a, vec4_t b) { a = a / b; return a; }
+static Vec2 operator/=(Vec2& a, Vec2 b) { a = a / b; return a; }
+static Vec3 operator/=(Vec3& a, Vec3 b) { a = a / b; return a; }
+static Vec4 operator/=(Vec4& a, Vec4 b) { a = a / b; return a; }
 
-static vec2i_t operator/=(vec2i_t& a, vec2i_t b) { a = a / b; return a; }
-static vec3i_t operator/=(vec3i_t& a, vec3i_t b) { a = a / b; return a; }
-static vec4i_t operator/=(vec4i_t& a, vec4i_t b) { a = a / b; return a; }
+static Vec2i operator/=(Vec2i& a, Vec2i b) { a = a / b; return a; }
+static Vec3i operator/=(Vec3i& a, Vec3i b) { a = a / b; return a; }
+static Vec4i operator/=(Vec4i& a, Vec4i b) { a = a / b; return a; }
 
-static vec2_t operator/=(vec2_t& a, f32 b) { a = a / b; return a; }
-static vec3_t operator/=(vec3_t& a, f32 b) { a = a / b; return a; }
-static vec4_t operator/=(vec4_t& a, f32 b) { a = a / b; return a; }
+static Vec2 operator/=(Vec2& a, f32 b) { a = a / b; return a; }
+static Vec3 operator/=(Vec3& a, f32 b) { a = a / b; return a; }
+static Vec4 operator/=(Vec4& a, f32 b) { a = a / b; return a; }
 
-static vec2i_t operator/=(vec2i_t& a, i32 b) { a = a / b; return a; }
-static vec3i_t operator/=(vec3i_t& a, i32 b) { a = a / b; return a; }
-static vec4i_t operator/=(vec4i_t& a, i32 b) { a = a / b; return a; }
+static Vec2i operator/=(Vec2i& a, i32 b) { a = a / b; return a; }
+static Vec3i operator/=(Vec3i& a, i32 b) { a = a / b; return a; }
+static Vec4i operator/=(Vec4i& a, i32 b) { a = a / b; return a; }
 
 // ----------- equal ------------ //
 
-static bool operator==(vec2i_t a, vec2i_t b) { return a.x == b.x && a.y == b.y; }
-static bool operator==(vec3i_t a, vec3i_t b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
-static bool operator==(vec4i_t a, vec4i_t b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
+static bool operator==(Vec2i a, Vec2i b) { return a.x == b.x && a.y == b.y; }
+static bool operator==(Vec3i a, Vec3i b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
+static bool operator==(Vec4i a, Vec4i b) { return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w; }
 
-static bool operator!=(vec2i_t a, vec2i_t b) { return a.x != b.x || a.y != b.y; }
-static bool operator!=(vec3i_t a, vec3i_t b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
-static bool operator!=(vec4i_t a, vec4i_t b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
+static bool operator!=(Vec2i a, Vec2i b) { return a.x != b.x || a.y != b.y; }
+static bool operator!=(Vec3i a, Vec3i b) { return a.x != b.x || a.y != b.y || a.z != b.z; }
+static bool operator!=(Vec4i a, Vec4i b) { return a.x != b.x || a.y != b.y || a.z != b.z || a.w != b.w; }
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1771,8 +1771,8 @@ static bool operator!=(vec4i_t a, vec4i_t b) { return a.x != b.x || a.y != b.y |
 
 // ---------------------- arena allocator ------------------------ //
 
-extern memory_arena_t maCreate(u8* buffer, u32 size) {
-    memory_arena_t ma = {};
+extern MemoryArena maCreate(u8* buffer, u32 size) {
+    MemoryArena ma = {};
 
     ma.cap    = size;
     ma.buffer = buffer;
@@ -1780,7 +1780,7 @@ extern memory_arena_t maCreate(u8* buffer, u32 size) {
     return ma;
 }
 
-extern void* maAlloc(memory_arena_t* ma, u32 byte_size) {
+extern void* maAlloc(MemoryArena* ma, u32 byte_size) {
     byte_size = ALIGN_UP(byte_size, 16);
 
     assert(((ma->index + byte_size) < ma->cap) && !ma->lock);
@@ -1794,27 +1794,27 @@ extern void* maAlloc(memory_arena_t* ma, u32 byte_size) {
     return memory;
 }
 
-extern void* maBegin(memory_arena_t* ma) {
+extern void* maBegin(MemoryArena* ma) {
     ma->lock = true;
     return ma->buffer + ma->index;
 }
 
-extern void maEnd(memory_arena_t* ma, u32 byte_size) {
+extern void maEnd(MemoryArena* ma, u32 byte_size) {
     ma->index += ALIGN_UP(byte_size, 16);
     ma->lock = false;
 }
 
-extern void maSave(memory_arena_t* ma) {
+extern void maSave(MemoryArena* ma) {
     assert(ma->top < ma->cap);
     ma->stack[ma->top++] = ma->index;
 }
 
-extern void maRestore(memory_arena_t* ma) {
+extern void maRestore(MemoryArena* ma) {
     assert(ma->top > 0);
     ma->index = ma->stack[--ma->top];
 }
 
-extern void maValidate(memory_arena_t* ma) {
+extern void maValidate(MemoryArena* ma) {
     assert(ma->top == 0);
 }
 
@@ -1828,14 +1828,14 @@ static size_t fileGetSize(FILE* fp) {
     return size;
 }
 
-extern char* fileReadStr(const char* file_name, memory_arena_t* ma) {
+extern char* fileReadStr(const char* file_name, MemoryArena* ma) {
     FILE *fp      = NULL;
     char *buffer  = NULL;
     
     if (fopen_s(&fp, file_name, "rb") == 0) {
         size_t size = fileGetSize(fp);
 
-        memory_arena_t state = *ma;
+        MemoryArena state = *ma;
         buffer = (char*)maAlloc(ma, size + 1);
 
         if (buffer) {
@@ -1894,7 +1894,7 @@ extern b32 fileReadBin(const char* file_name, void* buffer, u32 size) {
     return false;
 } 
 
-extern b32 file_write_bin(const char* file_name, const void* buffer, u32 size) {
+extern b32 fileWriteBind(const char* file_name, const void* buffer, u32 size) {
     FILE *fp = NULL;
 
     if (fopen_s(&fp, file_name, "wb") == 0) {
@@ -1911,8 +1911,8 @@ extern b32 file_write_bin(const char* file_name, const void* buffer, u32 size) {
 #define STB_IMAGE_IMPLEMENTATION
 #include "dep/stb_image.h" 
 
-extern image_t loadImageFromFile(const char* path) {
-    image_t image = {0};
+extern Image loadImageFromFile(const char* path) {
+    Image image = {0};
     i32 channels = 0;
 
     image.pixels = (u32*)stbi_load(path, &image.width, &image.height, &channels, 4);
@@ -1921,11 +1921,11 @@ extern image_t loadImageFromFile(const char* path) {
     return image;
 }
 
-extern u32 getPixel(image_t* img, i32 x, i32 y) {
+extern u32 getPixel(Image* img, i32 x, i32 y) {
     return img->pixels[y * img->width + x];
 }
 
-extern void setPixel(image_t* img, i32 x, i32 y, u32 pixel) {
+extern void setPixel(Image* img, i32 x, i32 y, u32 pixel) {
     img->pixels[y * img->width + x] = pixel;
 }
 

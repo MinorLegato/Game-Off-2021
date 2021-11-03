@@ -291,11 +291,6 @@ static struct {
     Gamepad gamepad[JOYSTICK_LAST];
 } platform;
 
-// ===================================================================================================== //
-// ======================================= PLATFORM IMPL =============================================== //
-// ===================================================================================================== //
-#ifdef ATS_IMPL
-
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #pragma comment(lib, "glfw3_mt.lib")
 #pragma comment(lib, "opengl32.lib")
@@ -576,16 +571,16 @@ extern f64 getCurrentTime(void) {
     return glfwGetTime();
 }
 
-struct gl_texture_t {
+struct GL_Texture {
     u32 id;
     int width;
     int height;
 };
 
-extern gl_texture_t gl_texture_create(void *pixels, int width, int height, int is_smooth) {
+extern GL_Texture gl_createTexture(void *pixels, int width, int height, int is_smooth) {
     assert(pixels);
 
-    gl_texture_t texture = {0};
+    GL_Texture texture = {0};
 
     texture.width = width;
     texture.height = height;
@@ -603,8 +598,8 @@ extern gl_texture_t gl_texture_create(void *pixels, int width, int height, int i
     return texture;
 }
 
-extern gl_texture_t gl_texture_load_from_file(const char *texture_path, int is_smooth) {
-    gl_texture_t texture = {};
+extern GL_Texture gl_loadTextureFromFile(const char *texture_path, b32 is_smooth) {
+    GL_Texture texture = {};
     i32 channels = 0;
 
     unsigned char* pixels = stbi_load(texture_path, &texture.width, &texture.height, &channels, 4);
@@ -626,7 +621,7 @@ extern gl_texture_t gl_texture_load_from_file(const char *texture_path, int is_s
     return texture;
 }
 
-extern void gl_texture_update(gl_texture_t* texture, void *pixels, int width, int height, int is_smooth) {
+extern void gl_updateTexture(GL_Texture* texture, void *pixels, int width, int height, int is_smooth) {
     texture->width = width;
     texture->height = height;
 
@@ -639,11 +634,11 @@ extern void gl_texture_update(gl_texture_t* texture, void *pixels, int width, in
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-extern void gl_texture_bind(const gl_texture_t *texture) {
+extern void gl_bindTexture(const GL_Texture *texture) {
     glBindTexture(GL_TEXTURE_2D, texture->id);
 }
 
-extern void gl_texture_delete(gl_texture_t* texture) {
+extern void gl_deleteTexture(GL_Texture* texture) {
     glDeleteTextures(1, &texture->id);
     memset(texture, 0, sizeof *texture);
 }
@@ -703,7 +698,7 @@ extern u32 gl_createShader(const char* vs, const char* fs) {
     return program;
 }
 
-extern u32 gl_loadShaderFromFiles(const char *vs, const char *fs, memory_arena_t* ma) {
+extern u32 gl_loadShaderFromFiles(const char *vs, const char *fs, MemoryArena* ma) {
     maSave(ma);
 
     char* vs_content = fileReadStr(vs, ma);
@@ -716,7 +711,7 @@ extern u32 gl_loadShaderFromFiles(const char *vs, const char *fs, memory_arena_t
     return program;
 }
 
-extern vec3_t gl_getWorldPosition(int x, int y, mat4_t in_projection, mat4_t in_modelview) {
+extern Vec3 gl_getWorldPosition(int x, int y, const Mat4& in_projection, const Mat4& in_modelview) {
     GLint viewport[4] = {0};
     f64 modelview[16] = {0};
     f64 projection[16] = {0};
@@ -739,6 +734,4 @@ extern vec3_t gl_getWorldPosition(int x, int y, mat4_t in_projection, mat4_t in_
  
     return v3((f32)result[0], (f32)result[1], (f32)result[2]);
 }
-
-#endif // ATS_IMPL
 
