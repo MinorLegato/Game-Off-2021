@@ -1,36 +1,41 @@
-#include "ats.h"
+#define ATS_IMPL
+#include "ats/ats.h"
+#include "ats/ats_platform.h"
 
 int main(void) {
-    initPlatform("Game Off 2021", 800, 600);
+    initPlatform("Game Off 2021", 800, 600, 8);
 
-    auto pos = v2(0, 0);
+    const char* vs = GLSL_SHADER(
+        const vec4[] position = vec4[](
+            vec4(0, 1, 0, 1),
+            vec4(-1, -1, 0, 1),
+            vec4(1, -1, 0, 1));
+
+        void main() {
+            gl_Position = position[gl_VertexID];
+        });
+
+    const char* fs = GLSL_SHADER(
+        out vec4 out_color;
+        void main() {
+            out_color = vec4(1, 0, 1, 1);
+        });
+
+    u32 program = gl_createShader(vs, fs);
+
+    u32 vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     while (!platform.close) {
         f32 dt = platform.time.delta;
 
         if (platform.keyboard.pressed[KEY_ESCAPE]) { platform.close = true; }
 
-        if (platform.keyboard.down[KEY_W]) pos.y += dt;
-        if (platform.keyboard.down[KEY_S]) pos.y -= dt;
-        if (platform.keyboard.down[KEY_A]) pos.x -= dt;
-        if (platform.keyboard.down[KEY_D]) pos.x += dt;
-
-        glMatrixMode(GL_PROJECTION);
-        glLoadMatrixf(m4Perspective(0.5 * PI, platform.window.aspect_ratio, 0.1, 32).getPtr());
-        glMatrixMode(GL_MODELVIEW);
-        glLoadMatrixf(m4LookAt(v3(0, 0, 2), v3(0, 0, 0), v3(0, 1, 0)).getPtr());
-
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        glBegin(GL_TRIANGLES);
-        glColor3f(1, 0, 0); glVertex3f(pos.x + 0, pos.y + 1, 0);
-        glColor3f(0, 1, 0); glVertex3f(pos.x - 1, pos.y - 1, 0);
-        glColor3f(0, 0, 1); glVertex3f(pos.x + 1, pos.y - 1, 0);
-        glEnd();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         updatePlatform();
     }
-
-    exitPlatform();
 }
 
