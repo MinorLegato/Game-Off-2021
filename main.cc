@@ -2,13 +2,17 @@
 #include "ats/ats.h"
 #include "ats/ats_platform.h"
 
+#define CUTE_C2_IMPLEMENTATION
+#include "ats/dep/cute_c2.h"
+
 #include "map.h"
 #include "entity.h"
 #include "particle.h"
 #include "camera.h"
 #include "game_state.h"
 
-static u32 rs = 0xdeadbeef;
+static u32  rs = 0xdeadbeef;
+static Vec3 mouse_position = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 
 #include "init.cc"
 #include "update.cc"

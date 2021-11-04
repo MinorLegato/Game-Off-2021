@@ -186,6 +186,24 @@ static void renderGame(GameState* gs) {
     renderMap(gs);
     renderEntities(gs);
 
+    defer(gl_state.begin(GL_TRIANGLES), gl_state.end()) {
+        Vec3 pos = mouse_position;
+
+        pos.x = floorf(pos.x);
+        pos.y = floorf(pos.y);
+
+        gl_state.vertex(v3(pos.x - 0, pos.y - 0, 0.021), 0x33ffffff);
+        gl_state.vertex(v3(pos.x + 1, pos.y - 0, 0.021), 0x33ffffff);
+        gl_state.vertex(v3(pos.x + 1, pos.y + 1, 0.021), 0x33ffffff);
+
+        gl_state.vertex(v3(pos.x + 1, pos.y + 1, 0.021), 0x33ffffff);
+        gl_state.vertex(v3(pos.x - 0, pos.y + 1, 0.021), 0x33ffffff);
+        gl_state.vertex(v3(pos.x - 0, pos.y - 0, 0.021), 0x33ffffff);
+    }
+
+    
     gl_state.render();
+
+    mouse_position = gl_getWorldPosition(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);
 }
 

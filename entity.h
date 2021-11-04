@@ -1,8 +1,14 @@
 
 enum EntityType : u32 {
     EntityType_None,
+    // units:
     EntityType_Worker,
     EntityType_Guard,
+    // enemy units:
+    EntityType_Ant,
+    // buildings/commands:
+    EntityType_DestroyTile,
+    //
     EntityType_Count,
 };
 
@@ -20,7 +26,10 @@ struct EntityInfo {
     AI_Type     ai;
     f32         rad;
     u32         color;
+    f32         max_life;
 };
+
+static EntityInfo entity_info_table[EntityType_Count];
 
 struct Entity {
     EntityType  type;
@@ -28,11 +37,14 @@ struct Entity {
 
     Vec2        pos;
     Vec2        vel;
+    f32         life;
 
     AI_Type     ai;
-};
 
-static EntityInfo entity_info_table[EntityType_Count];
+    const EntityInfo* getInfo() const {
+        return &entity_info_table[type];
+    }
+};
 
 static void initEntityInfoTable(void) {
     {
@@ -45,17 +57,28 @@ static void initEntityInfoTable(void) {
     {
         EntityInfo* info = &entity_info_table[EntityType_Worker];
 
-        info->ai    = AI_WorkerIdle;
-        info->rad   = 0.18;
-        info->color = 0xff22bb22;
+        info->ai        = AI_WorkerIdle;
+        info->rad       = 0.18;
+        info->color     = 0xff22bb22;
+        info->max_life  = 1.0;
     }
 
     {
         EntityInfo* info = &entity_info_table[EntityType_Guard];
 
-        info->ai    = AI_GuardIdle;
-        info->rad   = 0.2;
-        info->color = 0xffbb4422;
+        info->ai        = AI_GuardIdle;
+        info->rad       = 0.2;
+        info->color     = 0xffbb4422;
+        info->max_life  = 2.0;
     }
+
+    {
+        EntityInfo* info = &entity_info_table[EntityType_DestroyTile];
+
+        info->rad       = 0.5;
+        info->color     = 0x77777777;
+        info->max_life  = 1.0;
+    }
+
 }
 

@@ -18,12 +18,13 @@ static void initGame(GameState* gs) {
     generateMap(&gs->map);
 
     for (u32 i = 0; i < 3; ++i) {
-        gs->newEntity(EntityType_Worker, 0.5 * v2(MAP_SIZE, MAP_SIZE) + randVec2(&rs, -2, 2));
+        gs->newEntity(EntityType_Worker, 0.5 * v2(MAP_SIZE, MAP_SIZE) + randVec2(&rs, -3, 3));
     }
 
     for (u32 i = 0; i < 2; ++i) {
-        gs->newEntity(EntityType_Guard, 0.5 * v2(MAP_SIZE, MAP_SIZE) + randVec2(&rs, -2, 2));
+        gs->newEntity(EntityType_Guard, 0.5 * v2(MAP_SIZE, MAP_SIZE) + randVec2(&rs, -3, 3));
     }
 
+    mouse_position = v3(gs->cam.pos.xy);
 }
 

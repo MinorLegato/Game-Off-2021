@@ -22,13 +22,16 @@ struct GameState {
 
     inline Entity* newEntity(EntityType type, Vec2 pos, Vec2 vel = {}) {
         if (entity_count >= ENTITY_MAX) return NULL;
-        Entity* e = &entity_array[entity_count++];
 
-        e->type = type;
-        e->id   = ++next_id;
-        e->pos  = pos;
-        e->vel  = vel;
-        e->ai   = entity_info_table[type].ai;
+        Entity*     e       = &entity_array[entity_count++];
+        EntityInfo* info    = &entity_info_table[type];
+
+        e->type     = type;
+        e->id       = ++next_id;
+        e->pos      = pos;
+        e->vel      = vel;
+        e->life     = info->max_life;
+        e->ai       = info->ai;
 
         return e;
     }

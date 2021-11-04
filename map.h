@@ -12,25 +12,39 @@ enum TileType : u32 {
 };
 
 struct TileInfo {
-    u32     color;
+    u32         color;
+    TileType    next;
+
+    f32         max_life;
 };
 
+static TileInfo tile_info_table[TileType_Count];
+
 struct Tile {
-    TileType type;
+    TileType    type;
+    f32         life;
 };
+
+#define OFF_MAP(x, y) ((x) < 0 || (x) >= MAP_SIZE || (y) < 0 || (y) >= MAP_SIZE)
 
 struct Map {
     Tile tiles[MAP_SIZE][MAP_SIZE];
     
     inline Tile* getTile(i32 x, i32 y) {
-        if (x < 0 || x >= MAP_SIZE) return NULL;
-        if (y < 0 || y >= MAP_SIZE) return NULL;
-
+        if (OFF_MAP(x, y)) return NULL;
         return &tiles[y][x];
     }
-};
 
-static TileInfo tile_info_table[TileType_Count];
+    inline const Tile* getTile(i32 x, i32 y) const {
+        if (OFF_MAP(x, y)) return NULL;
+        return &tiles[y][x];
+    }
+
+    inline b32 isTraversable(i32 x, i32 y) const {
+        const Tile* tile = getTile(x, y);
+        return tile && (tile->type != TileType_None);
+    }
+};
 
 static void initTileInfoTable(void) {
     {
