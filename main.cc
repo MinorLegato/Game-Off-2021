@@ -2,7 +2,11 @@
 #include "ats/ats.h"
 #include "ats/ats_platform.h"
 
-#include "types.h"
+#include "map.h"
+#include "entity.h"
+#include "particle.h"
+#include "camera.h"
+#include "game_state.h"
 
 static u32 rs = 0xdeadbeef;
 
@@ -15,6 +19,9 @@ static GameState game_state;
 int main(void) {
     initPlatform("Game Off 2021", 800, 600, 8);
     gl_state.init();
+
+    initEntityInfoTable();
+    initTileInfoTable();
 
     GameState* gs = &game_state;
     initGame(gs);

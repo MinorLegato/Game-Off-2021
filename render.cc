@@ -117,7 +117,7 @@ static struct GL_State {
 
 static void renderMap(GameState* gs) {
     // render tiles:
-    defer (gl_state.begin(GL_TRIANGLES), gl_state.end()) {
+    defer(gl_state.begin(GL_TRIANGLES), gl_state.end()) {
         for_map(x, y) {
             if (v2DistSq(gs->cam.pos.xy, v2(x + 0.5, y + 0.5)) > 32 * 32) {
                 continue;
@@ -130,10 +130,8 @@ static void renderMap(GameState* gs) {
 
             u32 color = packColorU8(c, c, c, 255);
 
-            switch (tile->type) {
-                case TileType_Dirt: {
-                    color = 0xff334566;
-                } break;
+            if (tile->type) {
+                color = tile_info_table[tile->type].color;
             }
 
             gl_state.vertex(v3(x + 0, y + 0, 0), color);
@@ -147,7 +145,7 @@ static void renderMap(GameState* gs) {
     }
 
     // render grid:
-    defer (gl_state.begin(GL_LINES), gl_state.end()) {
+    defer(gl_state.begin(GL_LINES), gl_state.end()) {
         for (i32 i = 0; i < MAP_SIZE; ++i) {
             gl_state.vertex(v3(0, i, 0.01), 0x77000000);
             gl_state.vertex(v3(MAP_SIZE, i, 0.01), 0x77000000);
@@ -158,28 +156,18 @@ static void renderMap(GameState* gs) {
 }
 
 static void renderEntities(GameState* gs) {
-    defer (gl_state.begin(GL_TRIANGLES), gl_state.end()) {
+    defer(gl_state.begin(GL_TRIANGLES), gl_state.end()) {
         for (u32 i = 0; i < gs->entity_count; ++i) {
-            Entity* e = &gs->entity_array[i];
-            
-            u32 color = 0xffffffff;
+            const Entity*     e    = &gs->entity_array[i];
+            const EntityInfo* info = &entity_info_table[e->type];
 
-            switch (e->type) {
-                case EntityType_Worker: {
-                    color = 0xff22bb22;
-                } break;
-                case EntityType_Guard: {
-                    color = 0xffbb4422;
-                } break;
-            }
+            gl_state.vertex(v3(e->pos.x - info->rad, e->pos.y - info->rad, 0.02), info->color);
+            gl_state.vertex(v3(e->pos.x + info->rad, e->pos.y - info->rad, 0.02), info->color);
+            gl_state.vertex(v3(e->pos.x + info->rad, e->pos.y + info->rad, 0.02), info->color);
 
-            gl_state.vertex(v3(e->pos.x - e->rad, e->pos.y - e->rad, 0.02), color);
-            gl_state.vertex(v3(e->pos.x + e->rad, e->pos.y - e->rad, 0.02), color);
-            gl_state.vertex(v3(e->pos.x + e->rad, e->pos.y + e->rad, 0.02), color);
-
-            gl_state.vertex(v3(e->pos.x + e->rad, e->pos.y + e->rad, 0.02), color);
-            gl_state.vertex(v3(e->pos.x - e->rad, e->pos.y + e->rad, 0.02), color);
-            gl_state.vertex(v3(e->pos.x - e->rad, e->pos.y - e->rad, 0.02), color);
+            gl_state.vertex(v3(e->pos.x + info->rad, e->pos.y + info->rad, 0.02), info->color);
+            gl_state.vertex(v3(e->pos.x - info->rad, e->pos.y + info->rad, 0.02), info->color);
+            gl_state.vertex(v3(e->pos.x - info->rad, e->pos.y - info->rad, 0.02), info->color);
         }
     }
 }
