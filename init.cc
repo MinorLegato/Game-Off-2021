@@ -1,13 +1,13 @@
 
 static void generateMap(Map* map) {
     for_map(x, y) {
-        Tile tile = {};
+        TileType tile_type = TileType_Rock;
 
         if (randI32(&rs, 0, 100) < 10 || v2DistSq(v2(x + 0.5, y + 0.5), 0.5 * v2(MAP_SIZE, MAP_SIZE)) < 3 * 3) {
-            tile.type = TileType_Dirt;
+            tile_type = TileType_Dirt;
         }
 
-        map->tiles[y][x] = tile;
+        initTile(&map->tiles[y][x], tile_type);
     }
 }
 

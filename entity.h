@@ -6,8 +6,6 @@ enum EntityType : u32 {
     EntityType_Guard,
     // enemy units:
     EntityType_Ant,
-    // buildings/commands:
-    EntityType_DestroyTile,
     //
     EntityType_Count,
 };
@@ -16,6 +14,7 @@ enum AI_Type : u32 {
     AI_None,
     // Worker AI:
     AI_WorkerIdle,
+    AI_WorkerExecuteOrder,
     // Guard AI:
     AI_GuardIdle,
     //
@@ -40,6 +39,11 @@ struct Entity {
     f32         life;
 
     AI_Type     ai;
+
+    union {
+        u32         target_id;
+        Vec2i       target_pos;
+    };
 
     const EntityInfo* getInfo() const {
         return &entity_info_table[type];
@@ -71,14 +75,5 @@ static void initEntityInfoTable(void) {
         info->color     = 0xffbb4422;
         info->max_life  = 2.0;
     }
-
-    {
-        EntityInfo* info = &entity_info_table[EntityType_DestroyTile];
-
-        info->rad       = 0.5;
-        info->color     = 0x77777777;
-        info->max_life  = 1.0;
-    }
-
 }
 

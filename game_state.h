@@ -35,5 +35,16 @@ struct GameState {
 
         return e;
     }
+
+    inline Entity* getEntity(u32 id) {
+        for (u32 i = 0; i < entity_count; ++i) {
+            Entity* e = &entity_array[i];
+            if (id == e->id) {
+                return e;
+            }
+        }
+
+        return NULL;
+    }
 };
 

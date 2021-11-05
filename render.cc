@@ -141,6 +141,16 @@ static void renderMap(GameState* gs) {
             gl_state.vertex(v3(x + 1, y + 1, 0), color);
             gl_state.vertex(v3(x + 0, y + 1, 0), color);
             gl_state.vertex(v3(x + 0, y + 0, 0), color);
+
+            if (tile->order) {
+                gl_state.vertex(v3(x + 0, y + 0, 0.01), 0x11eeeeee);
+                gl_state.vertex(v3(x + 1, y + 0, 0.01), 0x11eeeeee);
+                gl_state.vertex(v3(x + 1, y + 1, 0.01), 0x11eeeeee);
+
+                gl_state.vertex(v3(x + 1, y + 1, 0.01), 0x11eeeeee);
+                gl_state.vertex(v3(x + 0, y + 1, 0.01), 0x11eeeeee);
+                gl_state.vertex(v3(x + 0, y + 0, 0.01), 0x11eeeeee);
+            }
         }
     }
 

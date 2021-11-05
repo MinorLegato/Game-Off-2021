@@ -5,23 +5,36 @@
     for (i32 y = 0; y < MAP_SIZE; ++y) \
     for (i32 x = 0; x < MAP_SIZE; ++x) \
 
-enum TileType : u32 {
-    TileType_None,
+enum TileType : u16 {
+    TileType_Rock,
     TileType_Dirt,
     TileType_Count,
 };
 
-struct TileInfo {
-    u32         color;
-    TileType    next;
+enum OrderType : u16 {
+    OrderType_None,
+    OrderType_DestroyTile,
+    OrderType_Count,
+};
 
+struct TileInfo {
+    u32         is_wall : 1;
+    u32         : 0;
+
+    u32         color;
     f32         max_life;
+
+    TileType    destroy_tile;
 };
 
 static TileInfo tile_info_table[TileType_Count];
 
 struct Tile {
     TileType    type;
+
+    OrderType   order;
+    u32         worker_id;
+    
     f32         life;
 };
 
@@ -42,14 +55,37 @@ struct Map {
 
     inline b32 isTraversable(i32 x, i32 y) const {
         const Tile* tile = getTile(x, y);
-        return tile && (tile->type != TileType_None);
+        return tile && (tile->type != TileType_Rock);
     }
 };
 
 static void initTileInfoTable(void) {
-    {
-        TileInfo* info = &tile_info_table[TileType_Dirt];
-        info->color = 0xff334566;
+    for (u32 i = 0; i < TileType_Count; ++i) {
+        TileInfo* info = &tile_info_table[i];
+
+        info->destroy_tile = TileType_Dirt;
     }
+
+    {
+        TileInfo* info  = &tile_info_table[TileType_Rock];
+        info->is_wall   = true;
+    }
+
+    {
+        TileInfo* info  = &tile_info_table[TileType_Dirt];
+        info->color     = 0xff334566;
+    }
+}
+
+static void initTile(Tile* tile, TileType type) {
+    TileInfo* info = &tile_info_table[type];
+    
+    tile->type  = type;
+    tile->order = OrderType_None;
+    tile->life  = info->max_life;
+}
+
+static void destroyTile(Tile* tile) {
+    initTile(tile, tile_info_table[tile->type].destroy_tile);
 }
 
