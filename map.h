@@ -57,7 +57,7 @@ struct Map {
 
     inline b32 isTraversable(i32 x, i32 y) const {
         const Tile* tile = getTile(x, y);
-        return tile && (tile->type != TileType_Rock);
+        return tile && (!tile_info_table[tile->type].is_wall);
     }
 };
 

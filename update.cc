@@ -131,6 +131,9 @@ static void updateEntityAI(GameState* gs, f32 dt) {
                                 case OrderType_DestroyTile: {
                                     destroyTile(tile);
                                 } break;
+                                case OrderType_BuildRockWall: {
+                                    initTile(tile, TileType_RockWall);
+                                } break;
                             }
 
                             e->target_pos = {};
