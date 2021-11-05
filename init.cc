@@ -15,6 +15,8 @@ static void initGame(GameState* gs) {
     gs->init();
     gs->cam.pos = v3(0.5 * MAP_SIZE, 0.5 * MAP_SIZE, 8);
 
+    gs->order_tool = OrderType_DestroyTile;
+
     generateMap(&gs->map);
 
     for (u32 i = 0; i < 3; ++i) {

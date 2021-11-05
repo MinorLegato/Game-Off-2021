@@ -12,7 +12,7 @@ static void updatePlayer(GameState* gs, f32 dt) {
 
     if (platform.mouse.down[MOUSE_BUTTON_LEFT]) {
         if (Tile* tile = gs->map.getTile(floorf(mouse_position.x), floorf(mouse_position.y))) {
-            tile->order = OrderType_DestroyTile;
+            tile->order = gs->order_tool;
         }
     }
     
@@ -22,6 +22,16 @@ static void updatePlayer(GameState* gs, f32 dt) {
             tile->worker_id = 0;
         }
     }
+
+    if (platform.mouse.scroll.y < 0) {
+        gs->order_tool = (OrderType)((u32)gs->order_tool + 1);
+    }
+
+    if (platform.mouse.scroll.y > 0) {
+        gs->order_tool = (OrderType)((u32)gs->order_tool - 1);
+    }
+
+    gs->order_tool = (OrderType)CLAMP(gs->order_tool, (u32)OrderType_None + 1, (u32)OrderType_Count - 1);
 }
 
 static void updateEntityPhysics(GameState* gs, f32 dt) {
@@ -52,6 +62,7 @@ static void findWork(Entity* e, GameState* gs) {
 
                         return;
                     } if (Entity* worker = gs->getEntity(tile->worker_id)) {
+                        // transfrer order to entity 'e', if 'e' is closer:
                         if (e != worker && v2Dist(e->pos, v2(next) + v2(0.5)) < v2Dist(worker->pos, v2(next) + v2(0.5))) {
                             worker->ai          = AI_WorkerIdle;
                             worker->target_pos  = {}; 
@@ -64,6 +75,7 @@ static void findWork(Entity* e, GameState* gs) {
                             return;
                         }
                     } else {
+                        // current worker has disappeared, transfrer order to entity 'e':
                         tile->worker_id = e->id;
 
                         e->ai           = AI_WorkerExecuteOrder;

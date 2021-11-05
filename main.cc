@@ -5,7 +5,6 @@
 #define CUTE_C2_IMPLEMENTATION
 #include "ats/dep/cute_c2.h"
 
-#include "order.h"
 #include "map.h"
 #include "entity.h"
 #include "particle.h"
@@ -38,6 +37,10 @@ int main(void) {
 
         if (platform.keyboard.pressed[KEY_ESCAPE])  { platform.close = true; }
         if (platform.keyboard.pressed[KEY_F1])      { platform.fullscreen = !platform.fullscreen; }
+
+        if (platform.keyboard.pressed[KEY_T]) {
+            printf("%u\n", gs->order_tool);
+        }
 
         updateGame(gs, dt);
 

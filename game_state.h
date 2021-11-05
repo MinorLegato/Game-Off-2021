@@ -6,6 +6,8 @@ struct GameState {
     Camera      cam;
     Map         map;
 
+    OrderType   order_tool;
+
     u32         next_id;
     u32         entity_count;
     Entity      entity_array[ENTITY_MAX];

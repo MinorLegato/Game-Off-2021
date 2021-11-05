@@ -8,12 +8,14 @@
 enum TileType : u16 {
     TileType_Rock,
     TileType_Dirt,
+    TileType_RockWall,
     TileType_Count,
 };
 
 enum OrderType : u16 {
     OrderType_None,
     OrderType_DestroyTile,
+    OrderType_BuildRockWall,
     OrderType_Count,
 };
 
@@ -67,14 +69,21 @@ static void initTileInfoTable(void) {
     }
 
     {
+        TileInfo* info  = &tile_info_table[TileType_Dirt];
+        info->color     = 0xff334566;
+    }
+
+    {
         TileInfo* info  = &tile_info_table[TileType_Rock];
         info->is_wall   = true;
     }
 
     {
-        TileInfo* info  = &tile_info_table[TileType_Dirt];
-        info->color     = 0xff334566;
+        TileInfo* info  = &tile_info_table[TileType_RockWall];
+        info->is_wall   = true;
+        info->color     = 0xff555555;
     }
+
 }
 
 static void initTile(Tile* tile, TileType type) {
