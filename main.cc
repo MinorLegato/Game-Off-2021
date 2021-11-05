@@ -36,7 +36,8 @@ int main(void) {
     while (!platform.close) {
         f32 dt = platform.time.delta;
 
-        if (platform.keyboard.pressed[KEY_ESCAPE]) { platform.close = true; }
+        if (platform.keyboard.pressed[KEY_ESCAPE])  { platform.close = true; }
+        if (platform.keyboard.pressed[KEY_F1])      { platform.fullscreen = !platform.fullscreen; }
 
         updateGame(gs, dt);
 

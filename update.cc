@@ -33,7 +33,7 @@ static void updateEntityPhysics(GameState* gs, f32 dt) {
     }
 }
 
-static b32 findClosestWorkOrder(Entity* e, GameState* gs) {
+static void findWork(Entity* e, GameState* gs) {
     path_finder.init(v2i(e->pos), &gs->map);
 
     while (!path_finder.empty()) {
@@ -43,19 +43,40 @@ static b32 findClosestWorkOrder(Entity* e, GameState* gs) {
             Vec2i next = pos + path_dirs[i];
 
             if (Tile* tile = gs->map.getTile(next.x, next.y)) {
-                if (tile->order && !tile->worker_id) {
-                    tile->worker_id = e->id;
-                    e->target_pos = next;
+                if (tile->order) {
+                    if (!tile->worker_id) {
+                        tile->worker_id = e->id;
 
-                    return true;
+                        e->ai           = AI_WorkerExecuteOrder;
+                        e->target_pos   = next;
+
+                        return;
+                    } if (Entity* worker = gs->getEntity(tile->worker_id)) {
+                        if (e != worker && v2Dist(e->pos, v2(next) + v2(0.5)) < v2Dist(worker->pos, v2(next) + v2(0.5))) {
+                            worker->ai          = AI_WorkerIdle;
+                            worker->target_pos  = {}; 
+
+                            tile->worker_id     = e->id;
+
+                            e->ai               = AI_WorkerExecuteOrder;
+                            e->target_pos       = next;
+
+                            return;
+                        }
+                    } else {
+                        tile->worker_id = e->id;
+
+                        e->ai           = AI_WorkerExecuteOrder;
+                        e->target_pos   = next;
+
+                        return;
+                    }
                 }
 
                 path_finder.push(next);
             }
         }
     }
-
-    return false;
 }
 
 static void moveEntityTowardTarget(Entity* e, GameState* gs, f32 dt) {
@@ -86,9 +107,7 @@ static void updateEntityAI(GameState* gs, f32 dt) {
         switch (e->ai) {
             // Worker AI:
             case AI_WorkerIdle: {
-                if (findClosestWorkOrder(e, gs)) {
-                    e->ai = AI_WorkerExecuteOrder;
-                }
+                findWork(e, gs);
             } break;
             case AI_WorkerExecuteOrder: {
                 moveEntityTowardTarget(e, gs, dt);
