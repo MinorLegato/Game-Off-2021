@@ -7,7 +7,6 @@
 
 typedef u16 tile_type_t;
 enum {
-    TILE_TYPE_NONE,
     TILE_TYPE_DIRT,
     TILE_TYPE_ROCK,
     TILE_TYPE_ROCK_WALL,
@@ -24,7 +23,20 @@ typedef struct tile_info_t {
     tile_type_t destroy_tile;
 } tile_info_t;
 
-static tile_info_t tile_info_table[TILE_TYPE_COUNT];
+static tile_info_t tile_info_table[TILE_TYPE_COUNT] = {
+    [TILE_TYPE_DIRT] = {
+        .color = 0xff334566,
+    },
+
+    [TILE_TYPE_ROCK] = {
+        .is_wall = true,
+    },
+
+    [TILE_TYPE_ROCK_WALL] = {
+        .is_wall = true,
+        .color   = 0xff555555,
+    },
+};
 
 typedef struct tile_t {
     tile_type_t     type;
@@ -57,31 +69,6 @@ inline b32 map_is_traversable(map_t* map, i32 x, i32 y) {
     tile_t* tile = &map->tiles[y][x];
 
     return tile_is_traversable(tile);
-}
-
-static void init_tile_info_table(void) {
-    for (u32 i = 0; i < TILE_TYPE_COUNT; ++i) {
-        tile_info_t* info = &tile_info_table[i];
-
-        info->destroy_tile = TILE_TYPE_DIRT;
-    }
-
-    {
-        tile_info_t* info = &tile_info_table[TILE_TYPE_DIRT];
-        info->color = 0xff334566;
-    }
-
-    {
-        tile_info_t* info = &tile_info_table[TILE_TYPE_ROCK];
-        info->is_wall = true;
-    }
-
-    {
-        tile_info_t* info = &tile_info_table[TILE_TYPE_ROCK_WALL];
-        info->is_wall = true;
-        info->color   = 0xff555555;
-    }
-
 }
 
 static void init_tile(tile_t* tile, tile_type_t type) {

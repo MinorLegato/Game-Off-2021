@@ -30,7 +30,27 @@ typedef struct entity_info_t {
     f32         max_life;
 } entity_info_t;
 
-static entity_info_t entity_info_table[ENTITY_TYPE_COUNT];
+static entity_info_t entity_info_table[ENTITY_TYPE_COUNT] = {
+    [ENTITY_TYPE_NONE] = {
+        .rad   = 0.3,
+        .color = 0xff22bb22,
+    },
+
+    [ENTITY_TYPE_WORKER] = {
+        .ai        = AI_WORKER_IDLE,
+        .rad       = 0.18,
+        .color     = 0xff22bb22,
+        .max_life  = 1.0,
+    },
+
+    [ENTITY_TYPE_GUARD] = {
+        .ai        = AI_GUARD_IDLE,
+        .rad       = 0.2,
+        .color     = 0xffbb4422,
+        .max_life  = 2.0,
+    },
+};
+
 
 typedef struct entity_desc_t {
     entity_type_t   type;
@@ -56,32 +76,5 @@ typedef struct entity_t {
 
 const entity_info_t* entity_get_info(const entity_t* e) {
     return &entity_info_table[e->type];
-}
-
-static void init_entity_info_table(void) {
-    {
-        entity_info_t* info = &entity_info_table[ENTITY_TYPE_NONE];
-
-        info->rad   = 0.3;
-        info->color = 0xff22bb22;
-    }
-
-    {
-        entity_info_t* info = &entity_info_table[ENTITY_TYPE_WORKER];
-
-        info->ai        = AI_WORKER_IDLE;
-        info->rad       = 0.18;
-        info->color     = 0xff22bb22;
-        info->max_life  = 1.0;
-    }
-
-    {
-        entity_info_t* info = &entity_info_table[ENTITY_TYPE_GUARD];
-
-        info->ai        = AI_GUARD_IDLE;
-        info->rad       = 0.2;
-        info->color     = 0xffbb4422;
-        info->max_life  = 2.0;
-    }
 }
 

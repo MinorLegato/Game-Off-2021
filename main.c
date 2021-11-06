@@ -33,9 +33,6 @@ int main(void) {
     platform_init("Game Off 2021", 800, 600, 8);
     render_init();
 
-    init_entity_info_table();
-    init_tile_info_table();
-
     game_state_t* gs = &game_state;
     init_game(gs);
 
