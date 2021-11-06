@@ -42,16 +42,19 @@ static void update_entity_physics(game_state_t* gs, f32 dt) {
     for (u32 i = 0; i < gs->entity_count; ++i) {
         entity_t* e = &gs->entity_array[i];
 
-        e->pos += e->vel * dt;
-        e->vel -= 4 * e->vel * dt;
+        e->pos.x += e->vel.x * dt;
+        e->pos.y += e->vel.y * dt;
+
+        e->vel.x -= 4 * e->vel.x * dt;
+        e->vel.y -= 4 * e->vel.y * dt;
     }
 }
 
 static void find_work(entity_t* e, game_state_t* gs) {
-    path_finder.init(v2i(e->pos), &gs->map);
+    path_init(v2_cast(vec2i_t, e->pos), &gs->map);
 
-    while (!path_finder.empty()) {
-        vec2i_t pos = path_finder.pop();
+    while (!path_empty()) {
+        vec2i_t pos = path_pop();
         
         for (int i = 0; i < ARRAY_COUNT(path_dirs); ++i) {
             vec2i_t     next    = v2i_add(pos, path_dirs[i]);
@@ -71,7 +74,7 @@ static void find_work(entity_t* e, game_state_t* gs) {
                         // transfrer order to entity 'e', if 'e' is closer:
                         if (e != worker && v2_dist(e->pos, v2(next.x + 0.5, next.y + 0.5)) < v2_dist(worker->pos, v2(next.x + 0.5, next.y + 0.5))) {
                             worker->ai          = AI_WORKER_IDLE;
-                            worker->target_pos  = {}; 
+                            worker->target_pos  = v2i(0); 
 
                             tile->worker_id     = e->id;
 
@@ -91,27 +94,30 @@ static void find_work(entity_t* e, game_state_t* gs) {
                     }
                 }
 
-                path_finder.push(next);
+                path_push(next);
             }
         }
     }
 }
 
 static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
-    path_finder.init(e->target_pos, &gs->map);
+    path_init(e->target_pos, &gs->map);
 
-    while (!path_finder.empty()) {
-        vec2i_t pos = path_finder.pop();
+    while (!path_empty()) {
+        vec2i_t pos = path_pop();
         
         for (int i = 0; i < ARRAY_COUNT(path_dirs); ++i) {
             vec2i_t next = v2i_add(pos, path_dirs[i]);
 
             if (next.x == (i32)e->pos.x && next.y == (i32)e->pos.y) {
-                e->vel += 4 * v2_norm(v2(pos) + v2(0.5) - e->pos) * dt;
+                vec2_t dir = v2_norm(v2_sub(v2(pos.x + 0.5, pos.y + 0.5), e->pos));
+
+                e->vel.x += 4 * dir.x * dt;
+                e->vel.y += 4 * dir.y * dt;
                 return;
             }
 
-            path_finder.push(next);
+            path_push(next);
         }
     }
 }
@@ -141,12 +147,12 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
                                 } break;
                             }
 
-                            e->target_pos   = {};
+                            e->target_pos   = v2i(0);
                             e->ai           = AI_WORKER_IDLE;
                             tile->worker_id = 0;
                         }
                     } else {
-                        e->target_pos   = {};
+                        e->target_pos   = v2i(0);
                         e->ai           = AI_WORKER_IDLE;
                         tile->worker_id = 0;
                     }
@@ -164,10 +170,10 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
 }
 
 static c2Circle get_entity_circle(const entity_t* e) {
-    c2Circle c;
-    c.p = { e->pos.x, e->pos.y };
-    c.r = entity_info_table[e->type].rad;
-    return c;
+    return (c2Circle) {
+        .p = { e->pos.x, e->pos.y },
+        .r = entity_info_table[e->type].rad,
+    };
 }
 
 static void handle_entity_collisions(game_state_t* gs, f32 dt) {

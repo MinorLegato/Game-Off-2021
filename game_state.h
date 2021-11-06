@@ -2,7 +2,7 @@
 #define ENTITY_MAX      (2 * 1024)
 #define PARTICLE_MAX    (8 * 1024)
 
-struct game_state_t {
+typedef struct game_state_t {
     camera_t        cam;
     map_t           map;
 
@@ -14,18 +14,18 @@ struct game_state_t {
 
     u32             particle_count;
     particle_t      particle_array[PARTICLE_MAX];
-};
+} game_state_t;
 
-static entity_t* new_entity(game_state_t* gs, entity_type_t type, vec2_t pos, vec2_t vel = {}) {
+static entity_t* new_entity(game_state_t* gs, const entity_desc_t* desc) {
     if (gs->entity_count >= ENTITY_MAX) return NULL;
 
     entity_t* e = &gs->entity_array[gs->entity_count++];
-    const entity_info_t* info = &entity_info_table[type];
+    const entity_info_t* info = &entity_info_table[desc->type];
 
-    e->type     = type;
+    e->type     = desc->type;
     e->id       = ++gs->next_id;
-    e->pos      = pos;
-    e->vel      = vel;
+    e->pos      = desc->pos;
+    e->vel      = desc->vel;
     e->life     = info->max_life;
     e->ai       = info->ai;
 

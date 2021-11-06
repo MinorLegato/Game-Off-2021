@@ -1,3 +1,3 @@
 @echo off
-cl main.cc /Fe:a /O2 /MP /nologo /link /incremental:no
+cl main.c /Fe:a /O2 /MP /nologo /link /incremental:no
 

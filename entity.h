@@ -1,5 +1,6 @@
 
-enum entity_type_t : u32 {
+typedef u32 entity_type_t;
+enum {
     ENTITY_TYPE_NONE,
     // units:
     ENTITY_TYPE_WORKER,
@@ -10,7 +11,8 @@ enum entity_type_t : u32 {
     ENTITY_TYPE_COUNT,
 };
 
-enum ai_type_t : u32 {
+typedef u32 ai_type_t;
+enum {
     AI_NONE,
     // Worker AI:
     AI_WORKER_IDLE,
@@ -21,16 +23,22 @@ enum ai_type_t : u32 {
     AI_Count,
 };
 
-struct entity_info_t {
+typedef struct entity_info_t {
     ai_type_t   ai;
     f32         rad;
     u32         color;
     f32         max_life;
-};
+} entity_info_t;
 
 static entity_info_t entity_info_table[ENTITY_TYPE_COUNT];
 
-struct entity_t {
+typedef struct entity_desc_t {
+    entity_type_t   type;
+    vec2_t          pos;
+    vec2_t          vel;
+} entity_desc_t;
+
+typedef struct entity_t {
     entity_type_t   type;
     u32             id;
 
@@ -44,7 +52,7 @@ struct entity_t {
         u32         target_id;
         vec2i_t     target_pos;
     };
-};
+} entity_t;
 
 const entity_info_t* entity_get_info(const entity_t* e) {
     return &entity_info_table[e->type];

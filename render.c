@@ -96,7 +96,7 @@ static void render_game(game_state_t* gs) {
     camera_t* cam = &gs->cam;
 
     mat4_t projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
-    mat4_t view       = m4_look_at(cam->pos, v3(cam->pos.xy), v3(0, 1, 0));
+    mat4_t view       = m4_look_at(cam->pos, v3(.xy = cam->pos.xy), v3(0, 1, 0));
     mat4_t pvm        = m4_mul(projection, view);
 
     gl_uniform_m4(pvm_location, pvm);

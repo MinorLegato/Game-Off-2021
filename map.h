@@ -5,21 +5,23 @@
     for (i32 y = 0; y < MAP_SIZE; ++y) \
     for (i32 x = 0; x < MAP_SIZE; ++x) \
 
-enum tile_type_t : u16 {
+typedef u16 tile_type_t;
+enum {
     TILE_TYPE_ROCK,
     TILE_TYPE_DIRT,
     TILE_TYPE_ROCK_WALL,
     TILE_TYPE_COUNT,
 };
 
-enum order_type_t : u16 {
+typedef u16 order_type_t;
+enum {
     ORDER_TYPE_NONE,
     ORDER_TYPE_DESTROY_TILE,
     ORDER_TYPE_BUILD_ROCK_WALL,
     ORDER_TYPE_COUNT,
 };
 
-struct tile_info_t {
+typedef struct tile_info_t {
     u32 is_wall : 1;
     u32 : 0;
 
@@ -27,16 +29,16 @@ struct tile_info_t {
     f32 max_life;
 
     tile_type_t destroy_tile;
-};
+} tile_info_t;
 
 static tile_info_t tile_info_table[TILE_TYPE_COUNT];
 
-struct tile_t {
+typedef struct tile_t {
     tile_type_t     type;
     order_type_t    order;
     u32             worker_id;
     f32             life;
-};
+} tile_t;
 
 inline b32 tile_is_traversable(const tile_t* tile) {
     return tile && (!tile_info_table[tile->type].is_wall);
@@ -44,9 +46,9 @@ inline b32 tile_is_traversable(const tile_t* tile) {
 
 #define OFF_MAP(x, y) ((x) < 0 || (x) >= MAP_SIZE || (y) < 0 || (y) >= MAP_SIZE)
 
-struct map_t {
+typedef struct map_t {
     tile_t tiles[MAP_SIZE][MAP_SIZE];
-};
+} map_t;
 
 inline tile_t* map_get_tile(map_t* map, i32 x, i32 y) {
     if (OFF_MAP(x, y)) return NULL;

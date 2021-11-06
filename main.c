@@ -18,9 +18,9 @@
 static u32      rs              = 0xdeadbeef;
 static vec3_t   mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 
-#include "init.cc"
-#include "update.cc"
-#include "render.cc"
+#include "init.c"
+#include "update.c"
+#include "render.c"
 
 static game_state_t game_state;
 
@@ -31,7 +31,7 @@ int main(void) {
     init_entity_info_table();
     init_tile_info_table();
 
-    auto gs = &game_state;
+    game_state_t* gs = &game_state;
     init_game(gs);
 
     while (!platform.close) {
