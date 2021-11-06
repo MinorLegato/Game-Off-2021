@@ -121,6 +121,12 @@ static void render_game(game_state_t* gs) {
         sr_vertex(pos.x - 0, pos.y - 0, 0.021);
     }
 
+    {
+        defer(sr_begin(GL_TRIANGLES, sr_ui_text_shader), sr_end()) {
+            sr_render_string_format(32, 32, 0, 16, 16, 0xffbbbbbb, order_info_table[gs->order_tool].name);
+        }
+    }
+
     sr_end_frame();
 
     mouse_position = gl_get_world_position(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);

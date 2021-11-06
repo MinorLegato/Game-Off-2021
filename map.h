@@ -13,14 +13,6 @@ enum {
     TILE_TYPE_COUNT,
 };
 
-typedef u16 order_type_t;
-enum {
-    ORDER_TYPE_NONE,
-    ORDER_TYPE_DESTROY_TILE,
-    ORDER_TYPE_BUILD_ROCK_WALL,
-    ORDER_TYPE_COUNT,
-};
-
 typedef struct tile_info_t {
     u32 is_wall : 1;
     u32 : 0;

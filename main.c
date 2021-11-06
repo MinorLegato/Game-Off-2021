@@ -7,6 +7,7 @@
 #define CUTE_C2_IMPLEMENTATION
 #include "../ats/ext/cute_c2.h"
 
+#include "order.h"
 #include "map.h"
 #include "entity.h"
 #include "particle.h"

@@ -28,14 +28,14 @@ static void update_player(game_state_t* gs, f32 dt) {
     }
 
     if (platform.mouse.scroll.y < 0) {
-        gs->order_tool = (order_type_t)((u32)gs->order_tool + 1);
+        gs->order_tool++;
     }
 
     if (platform.mouse.scroll.y > 0) {
-        gs->order_tool = (order_type_t)((u32)gs->order_tool - 1);
+        gs->order_tool--;
     }
 
-    gs->order_tool = (order_type_t)CLAMP(gs->order_tool, (u32)ORDER_TYPE_NONE + 1, (u32)ORDER_TYPE_COUNT - 1);
+    gs->order_tool = CLAMP(gs->order_tool, ORDER_TYPE_NONE + 1, ORDER_TYPE_COUNT - 1);
 }
 
 static void update_entity_physics(game_state_t* gs, f32 dt) {
