@@ -21,7 +21,7 @@ static void render_map(game_state_t* gs) {
                 continue;
             }
 
-            auto tile = &gs->map.tiles[y][x];
+            tile_t* tile = &gs->map.tiles[y][x];
 
             u32 r = hash_u32(y * MAP_SIZE + x);
             u8  c = rand_i32(&r, 30, 34);
@@ -72,8 +72,8 @@ static void render_map(game_state_t* gs) {
 static void render_entities(game_state_t* gs) {
     defer(sr_begin(GL_TRIANGLES, shader), sr_end()) {
         for (u32 i = 0; i < gs->entity_count; ++i) {
-            auto e    = &gs->entity_array[i];
-            auto info = e->get_info();
+            entity_t* e = &gs->entity_array[i];
+            const entity_info_t* info = entity_get_info(e);
 
             sr_color(info->color);
 
@@ -93,11 +93,11 @@ static void render_game(game_state_t* gs) {
 
     gl_shader_use(shader);
 
-    auto cam = &gs->cam;
+    camera_t* cam = &gs->cam;
 
-    auto projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
-    auto view       = m4_look_at(cam->pos, v3(cam->pos.xy), v3(0, 1, 0));
-    auto pvm        = projection * view;
+    mat4_t projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
+    mat4_t view       = m4_look_at(cam->pos, v3(cam->pos.xy), v3(0, 1, 0));
+    mat4_t pvm        = m4_mul(projection, view);
 
     gl_uniform_m4(pvm_location, pvm);
 
@@ -105,7 +105,7 @@ static void render_game(game_state_t* gs) {
     render_entities(gs);
 
     defer(sr_begin(GL_TRIANGLES, shader), sr_end()) {
-        auto pos = mouse_position;
+        vec3_t pos = mouse_position;
 
         pos.x = floorf(pos.x);
         pos.y = floorf(pos.y);

@@ -1,6 +1,6 @@
 
 static void update_player(game_state_t* gs, f32 dt) {
-    auto cam = &gs->cam;
+    camera_t* cam = &gs->cam;
 
     if (platform.keyboard.down[KEY_W]) { cam->pos.y += 8 * dt; }
     if (platform.keyboard.down[KEY_S]) { cam->pos.y -= 8 * dt; }
@@ -11,13 +11,17 @@ static void update_player(game_state_t* gs, f32 dt) {
     if (platform.keyboard.down[KEY_KP_SUBTRACT])    { cam->pos.z += 8 * dt; }
 
     if (platform.mouse.down[MOUSE_BUTTON_LEFT]) {
-        if (auto tile = gs->map.get_tile(floorf(mouse_position.x), floorf(mouse_position.y))) {
+        tile_t* tile = NULL;
+
+        if (tile = map_get_tile(&gs->map, floorf(mouse_position.x), floorf(mouse_position.y))) {
             tile->order = gs->order_tool;
         }
     }
     
     if (platform.mouse.down[MOUSE_BUTTON_RIGHT]) {
-        if (auto tile = gs->map.get_tile(floorf(mouse_position.x), floorf(mouse_position.y))) {
+        tile_t* tile = NULL;
+
+        if (tile = map_get_tile(&gs->map, floorf(mouse_position.x), floorf(mouse_position.y))) {
             tile->order     = ORDER_TYPE_NONE;
             tile->worker_id = 0;
         }
@@ -36,7 +40,7 @@ static void update_player(game_state_t* gs, f32 dt) {
 
 static void update_entity_physics(game_state_t* gs, f32 dt) {
     for (u32 i = 0; i < gs->entity_count; ++i) {
-        auto e = &gs->entity_array[i];
+        entity_t* e = &gs->entity_array[i];
 
         e->pos += e->vel * dt;
         e->vel -= 4 * e->vel * dt;
@@ -47,12 +51,14 @@ static void find_work(entity_t* e, game_state_t* gs) {
     path_finder.init(v2i(e->pos), &gs->map);
 
     while (!path_finder.empty()) {
-        auto pos = path_finder.pop();
+        vec2i_t pos = path_finder.pop();
         
         for (int i = 0; i < ARRAY_COUNT(path_dirs); ++i) {
-            auto next = pos + path_dirs[i];
+            vec2i_t     next    = v2i_add(pos, path_dirs[i]);
+            tile_t*     tile    = map_get_tile(&gs->map, next.x, next.y);
+            entity_t*   worker  = NULL;
 
-            if (auto tile = gs->map.get_tile(next.x, next.y)) {
+            if (tile) {
                 if (tile->order) {
                     if (!tile->worker_id) {
                         tile->worker_id = e->id;
@@ -61,9 +67,9 @@ static void find_work(entity_t* e, game_state_t* gs) {
                         e->target_pos   = next;
 
                         return;
-                    } if (auto worker = gs->get_entity(tile->worker_id)) {
+                    } if (worker = get_entity(gs, tile->worker_id)) {
                         // transfrer order to entity 'e', if 'e' is closer:
-                        if (e != worker && v2_dist(e->pos, v2(next) + v2(0.5)) < v2_dist(worker->pos, v2(next) + v2(0.5))) {
+                        if (e != worker && v2_dist(e->pos, v2(next.x + 0.5, next.y + 0.5)) < v2_dist(worker->pos, v2(next.x + 0.5, next.y + 0.5))) {
                             worker->ai          = AI_WORKER_IDLE;
                             worker->target_pos  = {}; 
 
@@ -95,12 +101,12 @@ static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
     path_finder.init(e->target_pos, &gs->map);
 
     while (!path_finder.empty()) {
-        auto pos = path_finder.pop();
+        vec2i_t pos = path_finder.pop();
         
         for (int i = 0; i < ARRAY_COUNT(path_dirs); ++i) {
-            auto next = pos + path_dirs[i];
+            vec2i_t next = v2i_add(pos, path_dirs[i]);
 
-            if (next == v2i(e->pos)) {
+            if (next.x == (i32)e->pos.x && next.y == (i32)e->pos.y) {
                 e->vel += 4 * v2_norm(v2(pos) + v2(0.5) - e->pos) * dt;
                 return;
             }
@@ -112,7 +118,7 @@ static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
 
 static void update_entity_ai(game_state_t* gs, f32 dt) {
     for (u32 i = 0; i < gs->entity_count; ++i) {
-        auto e = &gs->entity_array[i];
+        entity_t* e = &gs->entity_array[i];
 
         switch (e->ai) {
             // Worker AI:
@@ -122,9 +128,10 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
             case AI_WORKER_EXECUTE_ORDER: {
                 move_entity_towards_target(e, gs, dt);
 
-                if (auto tile = gs->map.get_tile(e->target_pos.x, e->target_pos.y)) {
+                tile_t* tile = NULL;
+                if (tile = map_get_tile(&gs->map, e->target_pos.x, e->target_pos.y)) {
                     if (tile->order) {
-                        if (v2_dist_sq(e->pos, v2(e->target_pos) + v2(0.5)) <= (0.6 + entity_info_table[e->type].rad)) {
+                        if (v2_dist_sq(e->pos, v2(e->target_pos.x + 0.5, e->target_pos.y + 0.5)) <= (0.6 + entity_info_table[e->type].rad)) {
                             switch (tile->order) {
                                 case ORDER_TYPE_DESTROY_TILE: {
                                     destroy_tile(tile);
@@ -134,20 +141,23 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
                                 } break;
                             }
 
-                            e->target_pos = {};
-                            e->ai = AI_WORKER_IDLE;
+                            e->target_pos   = {};
+                            e->ai           = AI_WORKER_IDLE;
                             tile->worker_id = 0;
                         }
                     } else {
-                        e->target_pos = {};
-                        e->ai = AI_WORKER_IDLE;
+                        e->target_pos   = {};
+                        e->ai           = AI_WORKER_IDLE;
                         tile->worker_id = 0;
                     }
                 }
             } break;
             // Guard AI:
             case AI_GUARD_IDLE: {
-                e->vel += 6 * rand_unit_v2(&rs) * dt;
+                vec2_t ru = rand_unit_v2(&rs);
+
+                e->vel.x += 6 * ru.x * dt;
+                e->vel.y += 6 * ru.y * dt;
             } break;
         }
     }
@@ -164,12 +174,12 @@ static void handle_entity_collisions(game_state_t* gs, f32 dt) {
     // @TODO: broad-phase this shit!
     c2Manifold m;
     for (u32 i = 0; i < gs->entity_count; ++i) {
-        auto a          = &gs->entity_array[i];
-        auto a_circle   = get_entity_circle(a);
+        entity_t* a          = &gs->entity_array[i];
+        c2Circle  a_circle   = get_entity_circle(a);
 
         for (u32 j = 0; j < gs->entity_count; ++j) {
             if (i == j) continue;
-            auto b = &gs->entity_array[j];
+            const entity_t* b = &gs->entity_array[j];
 
             c2CircletoCircleManifold(a_circle, get_entity_circle(b), &m);
             for (int k = 0; k < m.count; ++k) {
@@ -180,9 +190,15 @@ static void handle_entity_collisions(game_state_t* gs, f32 dt) {
             }
         }
 
-        rect2i_t map_rect = { v2i(a->pos) - v2i(a->get_info()->rad + 1), v2i(a->pos) + v2i(a->get_info()->rad + 1) };
+        rect2i_t map_rect = {
+            (i32)(a->pos.x - entity_get_info(a)->rad),
+            (i32)(a->pos.y - entity_get_info(a)->rad),
+            (i32)(a->pos.x + entity_get_info(a)->rad),
+            (i32)(a->pos.y + entity_get_info(a)->rad),
+        };
+
         for_rect2(map_rect, x, y) {
-            if (!gs->map.is_traversable(x, y)) {
+            if (!map_is_traversable(&gs->map, x, y)) {
                 c2AABB tile_aabb = { { (f32)x, (f32)y }, { x + 1.0f, y + 1.0f } };
 
                 c2CircletoAABBManifold(a_circle, tile_aabb, &m);
@@ -205,7 +221,7 @@ static void update_entities(game_state_t* gs, f32 dt) {
 
 static void update_map(game_state_t* gs, f32 dt) {
     for_map(x, y) {
-        auto tile = &gs->map.tiles[y][x];
+        tile_t* tile = &gs->map.tiles[y][x];
         
         switch (tile->order) {
             case ORDER_TYPE_DESTROY_TILE: {

@@ -44,22 +44,22 @@ struct entity_t {
         u32         target_id;
         vec2i_t     target_pos;
     };
-
-    const entity_info_t* get_info(void) const {
-        return &entity_info_table[type];
-    }
 };
+
+const entity_info_t* entity_get_info(const entity_t* e) {
+    return &entity_info_table[e->type];
+}
 
 static void init_entity_info_table(void) {
     {
-        auto info = &entity_info_table[ENTITY_TYPE_NONE];
+        entity_info_t* info = &entity_info_table[ENTITY_TYPE_NONE];
 
         info->rad   = 0.3;
         info->color = 0xff22bb22;
     }
 
     {
-        auto info = &entity_info_table[ENTITY_TYPE_WORKER];
+        entity_info_t* info = &entity_info_table[ENTITY_TYPE_WORKER];
 
         info->ai        = AI_WORKER_IDLE;
         info->rad       = 0.18;
@@ -68,7 +68,7 @@ static void init_entity_info_table(void) {
     }
 
     {
-        auto info = &entity_info_table[ENTITY_TYPE_GUARD];
+        entity_info_t* info = &entity_info_table[ENTITY_TYPE_GUARD];
 
         info->ai        = AI_GUARD_IDLE;
         info->rad       = 0.2;

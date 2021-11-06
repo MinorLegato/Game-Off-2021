@@ -14,39 +14,32 @@ struct game_state_t {
 
     u32             particle_count;
     particle_t      particle_array[PARTICLE_MAX];
-
-    inline void init(void) {
-        next_id         = 0;
-
-        entity_count    = 0;
-        particle_count  = 0;
-    }
-
-    inline entity_t* new_entity(entity_type_t type, vec2_t pos, vec2_t vel = {}) {
-        if (entity_count >= ENTITY_MAX) return NULL;
-
-        auto e      = &entity_array[entity_count++];
-        auto info   = &entity_info_table[type];
-
-        e->type     = type;
-        e->id       = ++next_id;
-        e->pos      = pos;
-        e->vel      = vel;
-        e->life     = info->max_life;
-        e->ai       = info->ai;
-
-        return e;
-    }
-
-    inline entity_t* get_entity(u32 id) {
-        for (u32 i = 0; i < entity_count; ++i) {
-            auto e = &entity_array[i];
-            if (id == e->id) {
-                return e;
-            }
-        }
-
-        return NULL;
-    }
 };
+
+static entity_t* new_entity(game_state_t* gs, entity_type_t type, vec2_t pos, vec2_t vel = {}) {
+    if (gs->entity_count >= ENTITY_MAX) return NULL;
+
+    entity_t* e = &gs->entity_array[gs->entity_count++];
+    const entity_info_t* info = &entity_info_table[type];
+
+    e->type     = type;
+    e->id       = ++gs->next_id;
+    e->pos      = pos;
+    e->vel      = vel;
+    e->life     = info->max_life;
+    e->ai       = info->ai;
+
+    return e;
+}
+
+static entity_t* get_entity(game_state_t* gs, u32 id) {
+    for (u32 i = 0; i < gs->entity_count; ++i) {
+        entity_t* e = &gs->entity_array[i];
+        if (id == e->id) {
+            return e;
+        }
+    }
+
+    return NULL;
+}
 

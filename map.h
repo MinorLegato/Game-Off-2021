@@ -38,46 +38,47 @@ struct tile_t {
     f32             life;
 };
 
+inline b32 tile_is_traversable(const tile_t* tile) {
+    return tile && (!tile_info_table[tile->type].is_wall);
+}
+
 #define OFF_MAP(x, y) ((x) < 0 || (x) >= MAP_SIZE || (y) < 0 || (y) >= MAP_SIZE)
 
 struct map_t {
     tile_t tiles[MAP_SIZE][MAP_SIZE];
-    
-    inline tile_t* get_tile(i32 x, i32 y) {
-        if (OFF_MAP(x, y)) return NULL;
-        return &tiles[y][x];
-    }
-
-    inline const tile_t* get_tile(i32 x, i32 y) const {
-        if (OFF_MAP(x, y)) return NULL;
-        return &tiles[y][x];
-    }
-
-    inline b32 is_traversable(i32 x, i32 y) const {
-        auto tile = get_tile(x, y);
-        return tile && (!tile_info_table[tile->type].is_wall);
-    }
 };
+
+inline tile_t* map_get_tile(map_t* map, i32 x, i32 y) {
+    if (OFF_MAP(x, y)) return NULL;
+    return &map->tiles[y][x];
+}
+
+inline b32 map_is_traversable(map_t* map, i32 x, i32 y) {
+    if (OFF_MAP(x, y)) return false;
+    tile_t* tile = &map->tiles[y][x];
+
+    return tile_is_traversable(tile);
+}
 
 static void init_tile_info_table(void) {
     for (u32 i = 0; i < TILE_TYPE_COUNT; ++i) {
-        auto info = &tile_info_table[i];
+        tile_info_t* info = &tile_info_table[i];
 
         info->destroy_tile = TILE_TYPE_DIRT;
     }
 
     {
-        auto info = &tile_info_table[TILE_TYPE_DIRT];
+        tile_info_t* info = &tile_info_table[TILE_TYPE_DIRT];
         info->color = 0xff334566;
     }
 
     {
-        auto info = &tile_info_table[TILE_TYPE_ROCK];
+        tile_info_t* info = &tile_info_table[TILE_TYPE_ROCK];
         info->is_wall = true;
     }
 
     {
-        auto info = &tile_info_table[TILE_TYPE_ROCK_WALL];
+        tile_info_t* info = &tile_info_table[TILE_TYPE_ROCK_WALL];
         info->is_wall = true;
         info->color   = 0xff555555;
     }
@@ -85,7 +86,7 @@ static void init_tile_info_table(void) {
 }
 
 static void init_tile(tile_t* tile, tile_type_t type) {
-    auto info = &tile_info_table[type];
+    tile_info_t* info = &tile_info_table[type];
     
     tile->type  = type;
     tile->order = ORDER_TYPE_NONE;

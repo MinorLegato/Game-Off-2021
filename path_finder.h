@@ -8,12 +8,12 @@ static struct path_finder_t {
     vec2i_t queue   [MAP_SIZE * MAP_SIZE];
     b8      visited [MAP_SIZE][MAP_SIZE];
 
-    inline void init(vec2i_t pos, const map_t* map) {
+    inline void init(vec2i_t pos, map_t* map) {
         begin   = 0;
         end     = 0;
 
         for_map(x, y) {
-            visited[y][x] = !map->is_traversable(x, y);
+            visited[y][x] = !map_is_traversable(map, x, y);
         }
 
         queue[end++] = pos;

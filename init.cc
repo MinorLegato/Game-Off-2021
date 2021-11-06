@@ -12,7 +12,10 @@ static void generate_map(map_t* map) {
 }
 
 static void init_game(game_state_t* gs) {
-    gs->init();
+    gs->next_id         = 0;
+    gs->entity_count    = 0;
+    gs->particle_count  = 0;
+
     gs->cam.pos = v3(0.5 * MAP_SIZE, 0.5 * MAP_SIZE, 8);
 
     gs->order_tool = ORDER_TYPE_DESTROY_TILE;
@@ -20,11 +23,11 @@ static void init_game(game_state_t* gs) {
     generate_map(&gs->map);
 
     for (u32 i = 0; i < 3; ++i) {
-        gs->new_entity(ENTITY_TYPE_WORKER, 0.5 * v2(MAP_SIZE, MAP_SIZE) + rand_v2(&rs, -3, 3));
+        new_entity(gs, ENTITY_TYPE_WORKER, 0.5 * v2(MAP_SIZE, MAP_SIZE) + rand_v2(&rs, -3, 3));
     }
 
     for (u32 i = 0; i < 2; ++i) {
-        gs->new_entity(ENTITY_TYPE_GUARD, 0.5 * v2(MAP_SIZE, MAP_SIZE) + rand_v2(&rs, -3, 3));
+        new_entity(gs, ENTITY_TYPE_GUARD, 0.5 * v2(MAP_SIZE, MAP_SIZE) + rand_v2(&rs, -3, 3));
     }
 
     mouse_position = v3(gs->cam.pos.xy);
