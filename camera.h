@@ -1,5 +1,5 @@
 
-struct Camera {
-    Vec3    pos;
+struct camera_t {
+    vec3_t  pos;
 };
 

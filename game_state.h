@@ -2,31 +2,31 @@
 #define ENTITY_MAX      (2 * 1024)
 #define PARTICLE_MAX    (8 * 1024)
 
-struct GameState {
-    Camera      cam;
-    Map         map;
+struct game_state_t {
+    camera_t        cam;
+    map_t           map;
 
-    OrderType   order_tool;
+    order_type_t    order_tool;
 
-    u32         next_id;
-    u32         entity_count;
-    Entity      entity_array[ENTITY_MAX];
+    u32             next_id;
+    u32             entity_count;
+    entity_t        entity_array[ENTITY_MAX];
 
-    u32         particle_count;
-    Particle    particle_array[PARTICLE_MAX];
+    u32             particle_count;
+    particle_t      particle_array[PARTICLE_MAX];
 
-    inline void init() {
+    inline void init(void) {
         next_id         = 0;
 
         entity_count    = 0;
         particle_count  = 0;
     }
 
-    inline Entity* newEntity(EntityType type, Vec2 pos, Vec2 vel = {}) {
+    inline entity_t* new_entity(entity_type_t type, vec2_t pos, vec2_t vel = {}) {
         if (entity_count >= ENTITY_MAX) return NULL;
 
-        Entity*     e       = &entity_array[entity_count++];
-        EntityInfo* info    = &entity_info_table[type];
+        auto e      = &entity_array[entity_count++];
+        auto info   = &entity_info_table[type];
 
         e->type     = type;
         e->id       = ++next_id;
@@ -38,9 +38,9 @@ struct GameState {
         return e;
     }
 
-    inline Entity* getEntity(u32 id) {
+    inline entity_t* get_entity(u32 id) {
         for (u32 i = 0; i < entity_count; ++i) {
-            Entity* e = &entity_array[i];
+            auto e = &entity_array[i];
             if (id == e->id) {
                 return e;
             }

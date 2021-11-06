@@ -1,30 +1,30 @@
 
-static void generateMap(Map* map) {
+static void generate_map(map_t* map) {
     for_map(x, y) {
-        TileType tile_type = TileType_Rock;
+        tile_type_t tile_type = TILE_TYPE_ROCK;
 
-        if (randI32(&rs, 0, 100) < 10 || v2DistSq(v2(x + 0.5, y + 0.5), 0.5 * v2(MAP_SIZE, MAP_SIZE)) < 3 * 3) {
-            tile_type = TileType_Dirt;
+        if (rand_i32(&rs, 0, 100) < 10 || v2_dist_sq(v2(x + 0.5, y + 0.5), 0.5 * v2(MAP_SIZE, MAP_SIZE)) < 3 * 3) {
+            tile_type = TILE_TYPE_DIRT;
         }
 
-        initTile(&map->tiles[y][x], tile_type);
+        init_tile(&map->tiles[y][x], tile_type);
     }
 }
 
-static void initGame(GameState* gs) {
+static void init_game(game_state_t* gs) {
     gs->init();
     gs->cam.pos = v3(0.5 * MAP_SIZE, 0.5 * MAP_SIZE, 8);
 
-    gs->order_tool = OrderType_DestroyTile;
+    gs->order_tool = ORDER_TYPE_DESTROY_TILE;
 
-    generateMap(&gs->map);
+    generate_map(&gs->map);
 
     for (u32 i = 0; i < 3; ++i) {
-        gs->newEntity(EntityType_Worker, 0.5 * v2(MAP_SIZE, MAP_SIZE) + randVec2(&rs, -3, 3));
+        gs->new_entity(ENTITY_TYPE_WORKER, 0.5 * v2(MAP_SIZE, MAP_SIZE) + rand_v2(&rs, -3, 3));
     }
 
     for (u32 i = 0; i < 2; ++i) {
-        gs->newEntity(EntityType_Guard, 0.5 * v2(MAP_SIZE, MAP_SIZE) + randVec2(&rs, -3, 3));
+        gs->new_entity(ENTITY_TYPE_GUARD, 0.5 * v2(MAP_SIZE, MAP_SIZE) + rand_v2(&rs, -3, 3));
     }
 
     mouse_position = v3(gs->cam.pos.xy);

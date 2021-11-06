@@ -1,7 +1,7 @@
 
-struct Particle {
-    Vec3    pos;
-    Vec3    vel;
+struct particle_t {
+    vec3_t  pos;
+    vec3_t  vel;
 
     f32     rad;
 

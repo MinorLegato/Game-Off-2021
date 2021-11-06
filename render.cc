@@ -1,219 +1,151 @@
 
-static const char* vertex_shader = GLSL_SHADER(
-    layout (location = 0) in vec3 in_position;
-    layout (location = 1) in vec4 in_color;
+static const gl_shader_desc_t shader_desc = {
+    GLSL_SHADER(
+        layout (location = 0) in vec3 in_position;
+        layout (location = 1) in vec4 in_color;
 
-    out vec4 frag_color;
+        out vec4 frag_color;
 
-    uniform mat4 pvm;
+        uniform mat4 pvm;
 
-    void main() {
-        frag_color = in_color;
-        gl_Position = pvm * vec4(in_position, 1);
-    });
+        void main() {
+            frag_color = in_color;
+            gl_Position = pvm * vec4(in_position, 1);
+        }),
 
-static const char* fragment_shader = GLSL_SHADER(
-    in vec4 frag_color;
-    out vec4 out_color;
+    GLSL_SHADER(
+        in vec4 frag_color;
+        out vec4 out_color;
 
-    void main() {
-        out_color = frag_color;
-    });
-
-struct GL_Vertex {
-    Vec3    pos;
-    u32     color;
+        void main() {
+            out_color = frag_color;
+        }),
 };
 
-struct GL_Range {
-    u32     type;
-    u32     flags;
-    u32     index;
-    u32     count;
-};
+static gl_shader_t  shader;
+static u32          pvm_location;
 
-#define GL_STATE_VERTEX_MAX (1024 * 1024)
+static void render_init(void) {
+    sr_init();
+    sr_init_bitmap();
 
-static struct GL_State {
-    u32         shader;
+    shader = sr_basic_shader;
 
-    u32         pvm;
+    gl_shader_use(shader);
+    pvm_location = gl_shader_location(shader, "pvm");
 
-    u32         vao;
-    u32         vbo;
+}
 
-    GL_Range    range;
-
-    u32         vertex_count;
-    GL_Vertex   vertex_array[GL_STATE_VERTEX_MAX];
-
-    u32         range_count;
-    GL_Range    range_array[GL_STATE_VERTEX_MAX];
-
-    void init(void) {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f); 
-        glClearDepth(1.0f);
-
-        glDepthFunc(GL_LESS);
-
-        glEnable(GL_DEPTH_TEST);
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_BLEND);
-
-        shader = gl_createShader(vertex_shader, fragment_shader);
-        pvm    = glGetUniformLocation(shader, "pvm");
-
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof (GL_Vertex), (void*)offsetof(GL_Vertex, pos));
-        glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof (GL_Vertex), (void*)offsetof(GL_Vertex, color));
-    }
-
-    inline void begin(u32 type) {
-        range.type   = type;
-        range.index  = vertex_count;
-        range.count  = 0;
-    }
-
-    inline void end(void) {
-        range.count = vertex_count - range.index;
-
-        if (range.count > 0) {
-            range_array[range_count++] = range;
-        }
-
-        range = {};
-    }
-
-    inline void vertex(Vec3 pos, u32 color) {
-        GL_Vertex vertex = {};
-
-        vertex.pos      = pos;
-        vertex.color    = color;
-
-        vertex_array[vertex_count++] = vertex;
-    }
-
-    void render(void) {
-        glBufferData(GL_ARRAY_BUFFER, sizeof (vertex_array), vertex_array, GL_STATIC_DRAW);
-
-        for (u32 i = 0; i < range_count; ++i) {
-            const GL_Range* range = &range_array[i];
-            glDrawArrays(range->type, range->index, range->count);
-        }
-
-        vertex_count = 0;
-        range_count  = 0;
-    }
-} gl_state;
-
-static void renderMap(GameState* gs) {
+static void render_map(game_state_t* gs) {
     // render tiles:
-    defer(gl_state.begin(GL_TRIANGLES), gl_state.end()) {
+    defer(sr_begin(GL_TRIANGLES, shader), sr_end()) {
         for_map(x, y) {
-            if (v2DistSq(gs->cam.pos.xy, v2(x + 0.5, y + 0.5)) > 32 * 32) {
+            if (v2_dist_sq(gs->cam.pos.xy, v2(x + 0.5, y + 0.5)) > 32 * 32) {
                 continue;
             }
 
-            Tile* tile = &gs->map.tiles[y][x];
+            auto tile = &gs->map.tiles[y][x];
 
-            u32 r = hashU32(y * MAP_SIZE + x);
-            u8  c = randI32(&r, 30, 34);
+            u32 r = hash_u32(y * MAP_SIZE + x);
+            u8  c = rand_i32(&r, 30, 34);
 
-            u32 color = packColorU8(c, c, c, 255);
+            u32 color = pack_color_u8(c, c, c, 255);
 
             if (tile->type) {
                 color = tile_info_table[tile->type].color;
             }
 
-            gl_state.vertex(v3(x + 0, y + 0, 0), color);
-            gl_state.vertex(v3(x + 1, y + 0, 0), color);
-            gl_state.vertex(v3(x + 1, y + 1, 0), color);
+            sr_color(color);
 
-            gl_state.vertex(v3(x + 1, y + 1, 0), color);
-            gl_state.vertex(v3(x + 0, y + 1, 0), color);
-            gl_state.vertex(v3(x + 0, y + 0, 0), color);
+            sr_vertex(x + 0, y + 0, 0);
+            sr_vertex(x + 1, y + 0, 0);
+            sr_vertex(x + 1, y + 1, 0);
+
+            sr_vertex(x + 1, y + 1, 0);
+            sr_vertex(x + 0, y + 1, 0);
+            sr_vertex(x + 0, y + 0, 0);
 
             if (tile->order) {
-                gl_state.vertex(v3(x + 0, y + 0, 0.01), 0x11eeeeee);
-                gl_state.vertex(v3(x + 1, y + 0, 0.01), 0x11eeeeee);
-                gl_state.vertex(v3(x + 1, y + 1, 0.01), 0x11eeeeee);
+                sr_color(0x11eeeeee);
 
-                gl_state.vertex(v3(x + 1, y + 1, 0.01), 0x11eeeeee);
-                gl_state.vertex(v3(x + 0, y + 1, 0.01), 0x11eeeeee);
-                gl_state.vertex(v3(x + 0, y + 0, 0.01), 0x11eeeeee);
+                sr_vertex(x + 0, y + 0, 0.01);
+                sr_vertex(x + 1, y + 0, 0.01);
+                sr_vertex(x + 1, y + 1, 0.01);
+
+                sr_vertex(x + 1, y + 1, 0.01);
+                sr_vertex(x + 0, y + 1, 0.01);
+                sr_vertex(x + 0, y + 0, 0.01);
             }
         }
     }
 
     // render grid:
-    defer(gl_state.begin(GL_LINES), gl_state.end()) {
+    defer(sr_begin(GL_LINES, shader), sr_end()) {
+        sr_color(0x77000000);
+
         for (i32 i = 0; i < MAP_SIZE; ++i) {
-            gl_state.vertex(v3(0, i, 0.01), 0x77000000);
-            gl_state.vertex(v3(MAP_SIZE, i, 0.01), 0x77000000);
-            gl_state.vertex(v3(i, 0, 0.01), 0x77000000);
-            gl_state.vertex(v3(i, MAP_SIZE, 0.01), 0x77000000);
+            sr_vertex(0,        i,          0.01);
+            sr_vertex(MAP_SIZE, i,          0.01);
+            sr_vertex(i,        0,          0.01);
+            sr_vertex(i,        MAP_SIZE,   0.01);
         }
     }
 }
 
-static void renderEntities(GameState* gs) {
-    defer(gl_state.begin(GL_TRIANGLES), gl_state.end()) {
+static void render_entities(game_state_t* gs) {
+    defer(sr_begin(GL_TRIANGLES, shader), sr_end()) {
         for (u32 i = 0; i < gs->entity_count; ++i) {
-            const Entity*     e    = &gs->entity_array[i];
-            const EntityInfo* info = &entity_info_table[e->type];
+            auto e    = &gs->entity_array[i];
+            auto info = e->get_info();
 
-            gl_state.vertex(v3(e->pos.x - info->rad, e->pos.y - info->rad, 0.02), info->color);
-            gl_state.vertex(v3(e->pos.x + info->rad, e->pos.y - info->rad, 0.02), info->color);
-            gl_state.vertex(v3(e->pos.x + info->rad, e->pos.y + info->rad, 0.02), info->color);
+            sr_color(info->color);
 
-            gl_state.vertex(v3(e->pos.x + info->rad, e->pos.y + info->rad, 0.02), info->color);
-            gl_state.vertex(v3(e->pos.x - info->rad, e->pos.y + info->rad, 0.02), info->color);
-            gl_state.vertex(v3(e->pos.x - info->rad, e->pos.y - info->rad, 0.02), info->color);
+            sr_vertex(e->pos.x - info->rad, e->pos.y - info->rad, 0.02);
+            sr_vertex(e->pos.x + info->rad, e->pos.y - info->rad, 0.02);
+            sr_vertex(e->pos.x + info->rad, e->pos.y + info->rad, 0.02);
+
+            sr_vertex(e->pos.x + info->rad, e->pos.y + info->rad, 0.02);
+            sr_vertex(e->pos.x - info->rad, e->pos.y + info->rad, 0.02);
+            sr_vertex(e->pos.x - info->rad, e->pos.y - info->rad, 0.02);
         }
     }
 }
 
-static void renderGame(GameState* gs) {
-    glUseProgram(gl_state.shader);
+static void render_game(game_state_t* gs) {
+    sr_begin_frame();
 
-    Camera* cam = &gs->cam;
+    gl_shader_use(shader);
 
-    Mat4 projection = m4Perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
-    Mat4 view       = m4LookAt(cam->pos, v3(cam->pos.xy), v3(0, 1, 0));
-    Mat4 pvm        = projection * view;
+    auto cam = &gs->cam;
 
-    glUniformMatrix4fv(gl_state.pvm, 1, GL_FALSE, &pvm.x.x);
+    auto projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
+    auto view       = m4_look_at(cam->pos, v3(cam->pos.xy), v3(0, 1, 0));
+    auto pvm        = projection * view;
 
-    renderMap(gs);
-    renderEntities(gs);
+    gl_uniform_m4(pvm_location, pvm);
 
-    defer(gl_state.begin(GL_TRIANGLES), gl_state.end()) {
-        Vec3 pos = mouse_position;
+    render_map(gs);
+    render_entities(gs);
+
+    defer(sr_begin(GL_TRIANGLES, shader), sr_end()) {
+        auto pos = mouse_position;
 
         pos.x = floorf(pos.x);
         pos.y = floorf(pos.y);
 
-        gl_state.vertex(v3(pos.x - 0, pos.y - 0, 0.021), 0x33ffffff);
-        gl_state.vertex(v3(pos.x + 1, pos.y - 0, 0.021), 0x33ffffff);
-        gl_state.vertex(v3(pos.x + 1, pos.y + 1, 0.021), 0x33ffffff);
+        sr_color(0x33ffffff);
 
-        gl_state.vertex(v3(pos.x + 1, pos.y + 1, 0.021), 0x33ffffff);
-        gl_state.vertex(v3(pos.x - 0, pos.y + 1, 0.021), 0x33ffffff);
-        gl_state.vertex(v3(pos.x - 0, pos.y - 0, 0.021), 0x33ffffff);
+        sr_vertex(pos.x - 0, pos.y - 0, 0.021);
+        sr_vertex(pos.x + 1, pos.y - 0, 0.021);
+        sr_vertex(pos.x + 1, pos.y + 1, 0.021);
+
+        sr_vertex(pos.x + 1, pos.y + 1, 0.021);
+        sr_vertex(pos.x - 0, pos.y + 1, 0.021);
+        sr_vertex(pos.x - 0, pos.y - 0, 0.021);
     }
 
-    
-    gl_state.render();
+    sr_end_frame();
 
-    mouse_position = gl_getWorldPosition(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);
+    mouse_position = gl_get_world_position(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);
 }
 

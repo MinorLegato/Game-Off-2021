@@ -1,76 +1,76 @@
 
-enum EntityType : u32 {
-    EntityType_None,
+enum entity_type_t : u32 {
+    ENTITY_TYPE_NONE,
     // units:
-    EntityType_Worker,
-    EntityType_Guard,
+    ENTITY_TYPE_WORKER,
+    ENTITY_TYPE_GUARD,
     // enemy units:
-    EntityType_Ant,
+    ENTITY_TYPE_ANT,
     //
-    EntityType_Count,
+    ENTITY_TYPE_COUNT,
 };
 
-enum AI_Type : u32 {
-    AI_None,
+enum ai_type_t : u32 {
+    AI_NONE,
     // Worker AI:
-    AI_WorkerIdle,
-    AI_WorkerExecuteOrder,
+    AI_WORKER_IDLE,
+    AI_WORKER_EXECUTE_ORDER,
     // Guard AI:
-    AI_GuardIdle,
+    AI_GUARD_IDLE,
     //
     AI_Count,
 };
 
-struct EntityInfo {
-    AI_Type     ai;
+struct entity_info_t {
+    ai_type_t   ai;
     f32         rad;
     u32         color;
     f32         max_life;
 };
 
-static EntityInfo entity_info_table[EntityType_Count];
+static entity_info_t entity_info_table[ENTITY_TYPE_COUNT];
 
-struct Entity {
-    EntityType  type;
-    u32         id;
+struct entity_t {
+    entity_type_t   type;
+    u32             id;
 
-    Vec2        pos;
-    Vec2        vel;
-    f32         life;
+    vec2_t          pos;
+    vec2_t          vel;
+    f32             life;
 
-    AI_Type     ai;
+    ai_type_t       ai;
 
     union {
         u32         target_id;
-        Vec2i       target_pos;
+        vec2i_t     target_pos;
     };
 
-    const EntityInfo* getInfo() const {
+    const entity_info_t* get_info(void) const {
         return &entity_info_table[type];
     }
 };
 
-static void initEntityInfoTable(void) {
+static void init_entity_info_table(void) {
     {
-        EntityInfo* info = &entity_info_table[EntityType_None];
+        auto info = &entity_info_table[ENTITY_TYPE_NONE];
 
         info->rad   = 0.3;
         info->color = 0xff22bb22;
     }
 
     {
-        EntityInfo* info = &entity_info_table[EntityType_Worker];
+        auto info = &entity_info_table[ENTITY_TYPE_WORKER];
 
-        info->ai        = AI_WorkerIdle;
+        info->ai        = AI_WORKER_IDLE;
         info->rad       = 0.18;
         info->color     = 0xff22bb22;
         info->max_life  = 1.0;
     }
 
     {
-        EntityInfo* info = &entity_info_table[EntityType_Guard];
+        auto info = &entity_info_table[ENTITY_TYPE_GUARD];
 
-        info->ai        = AI_GuardIdle;
+        info->ai        = AI_GUARD_IDLE;
         info->rad       = 0.2;
         info->color     = 0xffbb4422;
         info->max_life  = 2.0;

@@ -1,9 +1,11 @@
 #define ATS_IMPL
-#include "ats/ats.h"
-#include "ats/ats_platform.h"
+#define ATS_OGL33
+#include "../ats/ats.h"
+#include "../ats/ats_platform.h"
+#include "../ats/ats_sr.h"
 
 #define CUTE_C2_IMPLEMENTATION
-#include "ats/dep/cute_c2.h"
+#include "../ats/ext/cute_c2.h"
 
 #include "map.h"
 #include "entity.h"
@@ -13,24 +15,24 @@
 
 #include "path_finder.h"
 
-static u32  rs = 0xdeadbeef;
-static Vec3 mouse_position = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
+static u32      rs              = 0xdeadbeef;
+static vec3_t   mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 
 #include "init.cc"
 #include "update.cc"
 #include "render.cc"
 
-static GameState game_state;
+static game_state_t game_state;
 
 int main(void) {
-    initPlatform("Game Off 2021", 800, 600, 8);
-    gl_state.init();
+    platform_init("Game Off 2021", 800, 600, 8);
+    render_init();
 
-    initEntityInfoTable();
-    initTileInfoTable();
+    init_entity_info_table();
+    init_tile_info_table();
 
-    GameState* gs = &game_state;
-    initGame(gs);
+    auto gs = &game_state;
+    init_game(gs);
 
     while (!platform.close) {
         f32 dt = platform.time.delta;
@@ -42,12 +44,12 @@ int main(void) {
             printf("%u\n", gs->order_tool);
         }
 
-        updateGame(gs, dt);
+        update_game(gs, dt);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderGame(gs);
+        render_game(gs);
 
-        updatePlatform();
+        platform_update();
     }
 }
 
