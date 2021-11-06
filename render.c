@@ -22,14 +22,15 @@ static void render_map(game_state_t* gs) {
             }
 
             tile_t* tile = &gs->map.tiles[y][x];
+            const tile_info_t* info = tile_get_info(tile);
 
             u32 r = hash_u32(y * MAP_SIZE + x);
             u8  c = rand_i32(&r, 30, 34);
 
             u32 color = pack_color_u8(c, c, c, 255);
 
-            if (tile->type) {
-                color = tile_info_table[tile->type].color;
+            if (info->color) {
+                color = info->color;
             }
 
             sr_color(color);
@@ -89,15 +90,13 @@ static void render_entities(game_state_t* gs) {
 }
 
 static void render_game(game_state_t* gs) {
-    sr_begin_frame();
-
     gl_shader_use(shader);
 
     camera_t* cam = &gs->cam;
 
-    mat4_t projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
-    mat4_t view       = m4_look_at(cam->pos, v3(.xy = cam->pos.xy), v3(0, 1, 0));
-    mat4_t pvm        = m4_mul(projection, view);
+    projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
+    view       = m4_look_at(cam->pos, v3(.xy = cam->pos.xy), v3(0, 1, 0));
+    pvm        = m4_mul(projection, view);
 
     gl_uniform_m4(pvm_location, pvm);
 
@@ -123,12 +122,7 @@ static void render_game(game_state_t* gs) {
 
     {
         defer(sr_begin(GL_TRIANGLES, sr_ui_text_shader), sr_end()) {
-            sr_render_string_format(32, 32, 0, 16, 16, 0xffbbbbbb, order_info_table[gs->order_tool].name);
+            sr_render_string_format(32, 32, 0, 12, 12, 0xffbbbbbb, order_info_table[gs->order_tool].name);
         }
     }
-
-    sr_end_frame();
-
-    mouse_position = gl_get_world_position(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);
 }
-

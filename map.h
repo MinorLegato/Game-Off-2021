@@ -7,8 +7,9 @@
 
 typedef u16 tile_type_t;
 enum {
-    TILE_TYPE_ROCK,
+    TILE_TYPE_NONE,
     TILE_TYPE_DIRT,
+    TILE_TYPE_ROCK,
     TILE_TYPE_ROCK_WALL,
     TILE_TYPE_COUNT,
 };
@@ -32,14 +33,18 @@ typedef struct tile_t {
     f32             life;
 } tile_t;
 
-inline b32 tile_is_traversable(const tile_t* tile) {
+static const tile_info_t* tile_get_info(const tile_t* tile) {
+    return &tile_info_table[tile->type];
+}
+
+static b32 tile_is_traversable(const tile_t* tile) {
     return tile && (!tile_info_table[tile->type].is_wall);
 }
 
 #define OFF_MAP(x, y) ((x) < 0 || (x) >= MAP_SIZE || (y) < 0 || (y) >= MAP_SIZE)
 
 typedef struct map_t {
-    tile_t tiles[MAP_SIZE][MAP_SIZE];
+    tile_t      tiles[MAP_SIZE][MAP_SIZE];
 } map_t;
 
 inline tile_t* map_get_tile(map_t* map, i32 x, i32 y) {
