@@ -14,27 +14,32 @@ enum {
 };
 
 typedef struct tile_info_t {
-    u32 is_wall : 1;
-    u32 : 0;
+    u32         is_wall : 1;
+    u32         : 0;
 
-    u32 color;
-    f32 max_life;
+    u32         color;
+    f32         max_life;
 
     tile_type_t destroy_tile;
+
+    char        name[32];
 } tile_info_t;
 
 static tile_info_t tile_info_table[TILE_TYPE_COUNT] = {
     [TILE_TYPE_DIRT] = {
-        .color = 0xff334566,
+        .name       = "dirt",
+        .color      = 0xff334566,
     },
 
     [TILE_TYPE_ROCK] = {
-        .is_wall = true,
+        .name       = "rock",
+        .is_wall    = true,
     },
 
     [TILE_TYPE_ROCK_WALL] = {
-        .is_wall = true,
-        .color   = 0xff555555,
+        .name       = "rock wall",
+        .is_wall    = true,
+        .color      = 0xff444444,
     },
 };
 

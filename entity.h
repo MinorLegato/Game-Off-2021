@@ -28,6 +28,8 @@ typedef struct entity_info_t {
     f32         rad;
     u32         color;
     f32         max_life;
+    
+    char        name[32];
 } entity_info_t;
 
 static entity_info_t entity_info_table[ENTITY_TYPE_COUNT] = {
@@ -37,20 +39,21 @@ static entity_info_t entity_info_table[ENTITY_TYPE_COUNT] = {
     },
 
     [ENTITY_TYPE_WORKER] = {
-        .ai        = AI_WORKER_IDLE,
-        .rad       = 0.18,
-        .color     = 0xff22bb22,
-        .max_life  = 1.0,
+        .name       = "worker",
+        .ai         = AI_WORKER_IDLE,
+        .rad        = 0.18,
+        .color      = 0xff22bb22,
+        .max_life   = 1.0,
     },
 
     [ENTITY_TYPE_GUARD] = {
-        .ai        = AI_GUARD_IDLE,
-        .rad       = 0.2,
-        .color     = 0xffbb4422,
-        .max_life  = 2.0,
+        .name       = "guard",
+        .ai         = AI_GUARD_IDLE,
+        .rad        = 0.2,
+        .color      = 0xffbb4422,
+        .max_life   = 2.0,
     },
 };
-
 
 typedef struct entity_desc_t {
     entity_type_t   type;

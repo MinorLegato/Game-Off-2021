@@ -123,6 +123,15 @@ static void render_game(game_state_t* gs) {
     {
         defer(sr_begin(GL_TRIANGLES, sr_ui_text_shader), sr_end()) {
             sr_render_string_format(32, 32, 0, 12, 12, 0xffbbbbbb, order_info_table[gs->order_tool].name);
+            
+            tile_t* tile = map_get_tile(&gs->map, mouse_position.x, mouse_position.y);
+            if (tile) {
+                const tile_info_t* info = tile_get_info(tile);
+
+                if (info->name[0] != '\0') {
+                    sr_render_string_format(platform.mouse.pos.x + 24, platform.mouse.pos.y + 12, 0, 12, 12, 0xffffffff, info->name);
+                }
+            }
         }
     }
 }

@@ -112,8 +112,8 @@ static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
             if (next.x == (i32)e->pos.x && next.y == (i32)e->pos.y) {
                 vec2_t dir = v2_norm(v2_sub(v2(pos.x + 0.5, pos.y + 0.5), e->pos));
 
-                e->vel.x += 4 * dir.x * dt;
-                e->vel.y += 4 * dir.y * dt;
+                e->vel.x += 6 * dir.x * dt;
+                e->vel.y += 6 * dir.y * dt;
                 return;
             }
 
