@@ -33,26 +33,10 @@ static void render_map(game_state_t* gs) {
                 color = info->color;
             }
 
-            sr_color(color);
-
-            sr_vertex(x + 0, y + 0, 0);
-            sr_vertex(x + 1, y + 0, 0);
-            sr_vertex(x + 1, y + 1, 0);
-
-            sr_vertex(x + 1, y + 1, 0);
-            sr_vertex(x + 0, y + 1, 0);
-            sr_vertex(x + 0, y + 0, 0);
+            sr_rect((rect2_t) { x, y, x + 1, y + 1 }, 0, color);
 
             if (tile->order) {
-                sr_color(0x11eeeeee);
-
-                sr_vertex(x + 0, y + 0, 0.01);
-                sr_vertex(x + 1, y + 0, 0.01);
-                sr_vertex(x + 1, y + 1, 0.01);
-
-                sr_vertex(x + 1, y + 1, 0.01);
-                sr_vertex(x + 0, y + 1, 0.01);
-                sr_vertex(x + 0, y + 0, 0.01);
+                sr_rect((rect2_t) { x, y, x + 1, y + 1 }, 0.01, 0x11eeeeee);
             }
         }
     }
@@ -90,14 +74,13 @@ static void render_entities(game_state_t* gs) {
 }
 
 static void render_game(game_state_t* gs) {
-    gl_shader_use(shader);
-
     camera_t* cam = &gs->cam;
 
     projection = m4_perspective(0.5 * PI, platform.aspect_ratio, 0.1, 32.0f);
     view       = m4_look_at(cam->pos, v3(.xy = cam->pos.xy), v3(0, 1, 0));
     pvm        = m4_mul(projection, view);
 
+    gl_shader_use(shader);
     gl_uniform_m4(pvm_location, pvm);
 
     render_map(gs);
@@ -120,17 +103,15 @@ static void render_game(game_state_t* gs) {
         sr_vertex(pos.x - 0, pos.y - 0, 0.021);
     }
 
-    {
-        defer(sr_begin(GL_TRIANGLES, sr_ui_text_shader), sr_end()) {
-            sr_render_string_format(32, 32, 0, 12, 12, 0xffbbbbbb, order_info_table[gs->order_tool].name);
-            
-            tile_t* tile = map_get_tile(&gs->map, mouse_position.x, mouse_position.y);
-            if (tile) {
-                const tile_info_t* info = tile_get_info(tile);
+    defer(sr_begin(GL_TRIANGLES, sr_ui_text_shader), sr_end()) {
+        sr_render_string_format(32, 32, 0, 12, 12, 0xffbbbbbb, order_info_table[gs->order_tool].name);
 
-                if (info->name[0] != '\0') {
-                    sr_render_string_format(platform.mouse.pos.x + 24, platform.mouse.pos.y + 12, 0, 12, 12, 0xffffffff, info->name);
-                }
+        tile_t* tile = map_get_tile(&gs->map, mouse_position.x, mouse_position.y);
+        if (tile) {
+            const tile_info_t* info = tile_get_info(tile);
+
+            if (info->name[0] != '\0') {
+                sr_render_string_format(platform.mouse.pos.x + 24, platform.mouse.pos.y + 12, 0, 12, 12, 0xffffffff, info->name);
             }
         }
     }

@@ -9,6 +9,9 @@ enum {
 
 typedef struct order_info_t {
     const char* name;
+    b32         on_ground;
+
+    i32         cost;
 } order_info_t;
 
 static order_info_t order_info_table[ORDER_TYPE_COUNT] = {
@@ -17,7 +20,8 @@ static order_info_t order_info_table[ORDER_TYPE_COUNT] = {
     },
 
     [ORDER_TYPE_BUILD_ROCK_WALL] = {
-        .name = "build rock wall",
+        .name       = "build rock wall",
+        .cost       = 50,
     },
 };
 

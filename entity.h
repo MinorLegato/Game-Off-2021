@@ -19,6 +19,9 @@ enum {
     AI_WORKER_EXECUTE_ORDER,
     // Guard AI:
     AI_GUARD_IDLE,
+    // Ant AI:
+    AI_ANT_IDLE,
+    AI_ANT_AGRO,
     //
     AI_Count,
 };
@@ -52,6 +55,14 @@ static entity_info_t entity_info_table[ENTITY_TYPE_COUNT] = {
         .rad        = 0.2,
         .color      = 0xffbb4422,
         .max_life   = 2.0,
+    },
+
+    [ENTITY_TYPE_ANT] = {
+        .name       = "ant",
+        .ai         = AI_ANT_IDLE,
+        .rad        = 0.24,
+        .color      = 0xff2244bb,
+        .max_life   = 1.0,
     },
 };
 

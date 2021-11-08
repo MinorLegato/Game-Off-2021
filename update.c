@@ -228,13 +228,9 @@ static void update_entities(game_state_t* gs, f32 dt) {
 static void update_map(game_state_t* gs, f32 dt) {
     for_map(x, y) {
         tile_t* tile = &gs->map.tiles[y][x];
-        
-        switch (tile->order) {
-            case ORDER_TYPE_DESTROY_TILE: {
-                if (tile->type == TILE_TYPE_DIRT) {
-                    tile->order = ORDER_TYPE_NONE;
-                }
-            } break;
+
+        if (tile_get_info(tile)->is_wall == order_info_table[tile->type].on_ground) {
+            tile->order = ORDER_TYPE_NONE;
         }
     }
 }

@@ -3,7 +3,7 @@ static void generate_map(map_t* map) {
     for_map(x, y) {
         tile_type_t tile_type = TILE_TYPE_ROCK;
 
-        if (rand_i32(&rs, 0, 100) < 10 || v2_dist_sq(v2(x + 0.5, y + 0.5), v2(0.5 * MAP_SIZE, 0.5 * MAP_SIZE)) < 3 * 3) {
+        if (rand_i32(&rs, 0, 100) < 15 || v2_dist_sq(v2(x + 0.5, y + 0.5), v2(0.5 * MAP_SIZE, 0.5 * MAP_SIZE)) < 3 * 3) {
             tile_type = TILE_TYPE_DIRT;
         }
 

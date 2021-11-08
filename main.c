@@ -16,12 +16,12 @@
 
 #include "path_finder.h"
 
-static mat4_t   projection      = {0};
-static mat4_t   view            = {0};
-static mat4_t   pvm             = {0};
+static mat4_t projection      = {0};
+static mat4_t view            = {0};
+static mat4_t pvm             = {0};
 
-static u32      rs              = 0xdeadbeef;
-static vec3_t   mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
+static u32    rs              = 0xdeadbeef;
+static vec3_t mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 
 #include "init.c"
 #include "update.c"
