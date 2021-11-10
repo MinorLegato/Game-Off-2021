@@ -64,14 +64,14 @@ typedef struct map_t {
     tile_t      tiles[MAP_SIZE][MAP_SIZE];
 } map_t;
 
-inline tile_t* map_get_tile(map_t* map, i32 x, i32 y) {
+static tile_t* map_get_tile(map_t* map, i32 x, i32 y) {
     if (OFF_MAP(x, y)) return NULL;
     return &map->tiles[y][x];
 }
 
-inline b32 map_is_traversable(map_t* map, i32 x, i32 y) {
+static b32 map_is_traversable(const map_t* map, i32 x, i32 y) {
     if (OFF_MAP(x, y)) return false;
-    tile_t* tile = &map->tiles[y][x];
+    const tile_t* tile = &map->tiles[y][x];
 
     return tile_is_traversable(tile);
 }

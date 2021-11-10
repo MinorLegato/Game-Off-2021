@@ -16,6 +16,8 @@
 
 #include "path_finder.h"
 
+static game_state_t game_state;
+
 static mat4_t projection      = {0};
 static mat4_t view            = {0};
 static mat4_t pvm             = {0};
@@ -26,8 +28,6 @@ static vec3_t mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 #include "init.c"
 #include "update.c"
 #include "render.c"
-
-static game_state_t game_state;
 
 int main(void) {
     platform_init("Game Off 2021", 800, 600, 8);

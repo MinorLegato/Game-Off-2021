@@ -51,7 +51,7 @@ static void update_entity_physics(game_state_t* gs, f32 dt) {
 }
 
 static void find_work(entity_t* e, game_state_t* gs) {
-    path_init(v2_cast(vec2i_t, e->pos), &gs->map);
+    path_init(v2_cast(vec2i_t, e->pos));
 
     while (!path_empty()) {
         vec2i_t pos = path_pop();
@@ -94,14 +94,14 @@ static void find_work(entity_t* e, game_state_t* gs) {
                     }
                 }
 
-                path_push(next);
+                path_push(next, &gs->map);
             }
         }
     }
 }
 
 static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
-    path_init(e->target_pos, &gs->map);
+    path_init(e->target_pos);
 
     while (!path_empty()) {
         vec2i_t pos = path_pop();
@@ -117,7 +117,7 @@ static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
                 return;
             }
 
-            path_push(next);
+            path_push(next, &gs->map);
         }
     }
 }

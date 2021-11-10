@@ -116,3 +116,4 @@ static void render_game(game_state_t* gs) {
         }
     }
 }
+
