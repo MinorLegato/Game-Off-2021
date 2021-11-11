@@ -77,6 +77,7 @@ static void render_map(game_state_t* gs) {
     }
 
     // render grid:
+#if 0
     defer(sr_begin(GL_LINES, sr_basic_shader), sr_end()) {
         sr_color(0x77000000);
 
@@ -92,6 +93,7 @@ static void render_map(game_state_t* gs) {
             sr_vertex(i,        MAP_SIZE,   1.01);
         }
     }
+#endif
 }
 
 static void render_entities(game_state_t* gs) {

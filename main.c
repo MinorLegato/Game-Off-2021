@@ -3,6 +3,9 @@
 #include "../ats/ats.h"
 #include "../ats/ats_platform.h"
 #include "../ats/ats_sr.h"
+
+
+#define TEXTURE_BORDER (0.02)
 #include "../ats/ats_texture_table.h"
 
 #define CUTE_C2_IMPLEMENTATION

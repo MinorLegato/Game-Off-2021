@@ -55,3 +55,20 @@ static vec2_t path_get_direction_towards(vec2_t start_position, vec2_t target_po
     return v2(0);
 }
 
+static b32 path_is_reachable(vec2i_t start, vec2i_t target, const map_t* map) {
+    path_init(target);
+
+    while (!path_empty()) {
+        vec2i_t current = path_pop();
+
+        for (u32 i = 0; i < ARRAY_COUNT(path_dirs); ++i) {
+            vec2i_t next = v2i_add(current, path_dirs[i]);
+
+            if (next.x == start.x && next.y == start.y) { return true; }
+            path_push(next, map);
+        }
+    }
+
+    return false;
+}
+

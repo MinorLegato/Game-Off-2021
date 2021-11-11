@@ -100,6 +100,22 @@ static void find_work(entity_t* e, game_state_t* gs) {
     }
 }
 
+static entity_t* find_closest_bug(game_state_t* gs, vec2_t pos) {
+    entity_t* result = NULL;
+
+    for (u32 i = 0; i < gs->entity_count; ++i) {
+        entity_t* e = &gs->entity_array[i];
+
+        if (e->type != ENTITY_TYPE_ANT) { continue; }
+
+        if (path_is_reachable(v2i(e->pos.x, e->pos.y), v2i(pos.x, pos.y), &gs->map)) {
+            return e;
+        }
+    }
+
+    return NULL;
+}
+
 static void update_entity_ai(game_state_t* gs, f32 dt) {
     for (u32 i = 0; i < gs->entity_count; ++i) {
         entity_t* e = &gs->entity_array[i];
@@ -136,13 +152,24 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
             } break;
             // Guard AI:
             case AI_GUARD_IDLE: {
-                vec2_t ru = rand_unit_v2(&rs);
-
-                e->vel.x += 6 * ru.x * dt;
-                e->vel.y += 6 * ru.y * dt;
+                entity_t* target = NULL;
+                if (target = find_closest_bug(gs, e->pos)) {
+                    e->ai           = AI_GUARD_KILL_TARGET;
+                    e->target_id    = target->id;
+                }
             } break;
             case AI_GUARD_KILL_TARGET: {
-                //
+                entity_t* target = NULL;
+                if (target = get_entity(gs, e->target_id)) {
+                    e->target_pos   = target->pos;
+
+                    if (v2_dist(e->pos, target->pos) < (0.05 + entity_get_info(e)->rad + entity_get_info(target)->rad)) {
+                        target->life = 0;
+                    }
+                } else {
+                    e->ai           = AI_GUARD_IDLE;
+                    e->target_id    = 0;
+                }
             } break;
         }
 
@@ -203,10 +230,21 @@ static void handle_entity_collisions(game_state_t* gs, f32 dt) {
     }
 }
 
+static void handle_dead_entities(game_state_t* gs, f32 dt) {
+    for (u32 i = 0; i < gs->entity_count; ++i) {
+        entity_t* e = &gs->entity_array[i];
+
+        if (e->life <= 0) {
+            gs->entity_array[i] = gs->entity_array[--gs->entity_count];
+        }
+    }
+}
+
 static void update_entities(game_state_t* gs, f32 dt) {
     update_entity_ai(gs, dt);
     update_entity_physics(gs, dt);
     handle_entity_collisions(gs, dt);
+    handle_dead_entities(gs, dt);
 }
 
 static void update_map(game_state_t* gs, f32 dt) {
