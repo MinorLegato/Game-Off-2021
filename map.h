@@ -9,7 +9,10 @@ typedef u16 tile_type_t;
 enum {
     TILE_TYPE_DIRT,
     TILE_TYPE_ROCK,
+    TILE_TYPE_COPPER,
+    // 
     TILE_TYPE_ROCK_WALL,
+    //
     TILE_TYPE_COUNT,
 };
 
@@ -23,23 +26,35 @@ typedef struct tile_info_t {
     tile_type_t destroy_tile;
 
     char        name[32];
+    char        texture[32];
 } tile_info_t;
 
 static tile_info_t tile_info_table[TILE_TYPE_COUNT] = {
     [TILE_TYPE_DIRT] = {
         .name       = "dirt",
-        .color      = 0xff334566,
+        .texture    = "stone_floor",
+        .color      = 0xffbbbbbb,
     },
 
     [TILE_TYPE_ROCK] = {
         .name       = "rock",
+        .texture    = "stone",
         .is_wall    = true,
+        .color      = 0xffffffff,
+    },
+
+    [TILE_TYPE_COPPER] = {
+        .name       = "copper",
+        .texture    = "copper",
+        .is_wall    = true,
+        .color      = 0xffffffff,
     },
 
     [TILE_TYPE_ROCK_WALL] = {
         .name       = "rock wall",
+        .texture    = "stone_floor",
         .is_wall    = true,
-        .color      = 0xff444444,
+        .color      = 0xffffffff,
     },
 };
 

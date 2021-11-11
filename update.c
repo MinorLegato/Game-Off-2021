@@ -67,19 +67,19 @@ static void find_work(entity_t* e, game_state_t* gs) {
                         tile->worker_id = e->id;
 
                         e->ai           = AI_WORKER_EXECUTE_ORDER;
-                        e->target_pos   = next;
+                        e->target_pos   = v2(next.x + 0.5, next.y + 0.5);
 
                         return;
                     } if (worker = get_entity(gs, tile->worker_id)) {
                         // transfrer order to entity 'e', if 'e' is closer:
                         if (e != worker && v2_dist(e->pos, v2(next.x + 0.5, next.y + 0.5)) < v2_dist(worker->pos, v2(next.x + 0.5, next.y + 0.5))) {
                             worker->ai          = AI_WORKER_IDLE;
-                            worker->target_pos  = v2i(0); 
+                            worker->target_pos  = worker->pos; 
 
                             tile->worker_id     = e->id;
 
                             e->ai               = AI_WORKER_EXECUTE_ORDER;
-                            e->target_pos       = next;
+                            e->target_pos       = v2(next.x + 0.5, next.y + 0.5);
 
                             return;
                         }
@@ -88,7 +88,7 @@ static void find_work(entity_t* e, game_state_t* gs) {
                         tile->worker_id = e->id;
 
                         e->ai           = AI_WORKER_EXECUTE_ORDER;
-                        e->target_pos   = next;
+                        e->target_pos   = v2(next.x + 0.5, next.y + 0.5);
 
                         return;
                     }
@@ -96,28 +96,6 @@ static void find_work(entity_t* e, game_state_t* gs) {
 
                 path_push(next, &gs->map);
             }
-        }
-    }
-}
-
-static void move_entity_towards_target(entity_t* e, game_state_t* gs, f32 dt) {
-    path_init(e->target_pos);
-
-    while (!path_empty()) {
-        vec2i_t pos = path_pop();
-        
-        for (int i = 0; i < ARRAY_COUNT(path_dirs); ++i) {
-            vec2i_t next = v2i_add(pos, path_dirs[i]);
-
-            if (next.x == (i32)e->pos.x && next.y == (i32)e->pos.y) {
-                vec2_t dir = v2_norm(v2_sub(v2(pos.x + 0.5, pos.y + 0.5), e->pos));
-
-                e->vel.x += 6 * dir.x * dt;
-                e->vel.y += 6 * dir.y * dt;
-                return;
-            }
-
-            path_push(next, &gs->map);
         }
     }
 }
@@ -132,12 +110,10 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
                 find_work(e, gs);
             } break;
             case AI_WORKER_EXECUTE_ORDER: {
-                move_entity_towards_target(e, gs, dt);
-
                 tile_t* tile = NULL;
                 if (tile = map_get_tile(&gs->map, e->target_pos.x, e->target_pos.y)) {
                     if (tile->order) {
-                        if (v2_dist_sq(e->pos, v2(e->target_pos.x + 0.5, e->target_pos.y + 0.5)) <= (0.6 + entity_info_table[e->type].rad)) {
+                        if (v2_dist_sq(e->pos, e->target_pos) <= (0.6 + entity_info_table[e->type].rad)) {
                             switch (tile->order) {
                                 case ORDER_TYPE_DESTROY_TILE: {
                                     destroy_tile(tile);
@@ -147,12 +123,12 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
                                 } break;
                             }
 
-                            e->target_pos   = v2i(0);
+                            e->target_pos   = e->pos;
                             e->ai           = AI_WORKER_IDLE;
                             tile->worker_id = 0;
                         }
                     } else {
-                        e->target_pos   = v2i(0);
+                        e->target_pos   = e->pos;
                         e->ai           = AI_WORKER_IDLE;
                         tile->worker_id = 0;
                     }
@@ -165,7 +141,15 @@ static void update_entity_ai(game_state_t* gs, f32 dt) {
                 e->vel.x += 6 * ru.x * dt;
                 e->vel.y += 6 * ru.y * dt;
             } break;
+            case AI_GUARD_KILL_TARGET: {
+                //
+            } break;
         }
+
+        vec2_t dir = path_get_direction_towards(e->pos, v2_cast(vec2_t, e->target_pos), &gs->map);
+
+        e->vel.x += 6 * dir.x * dt;
+        e->vel.y += 6 * dir.y * dt;
     }
 }
 

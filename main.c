@@ -3,6 +3,7 @@
 #include "../ats/ats.h"
 #include "../ats/ats_platform.h"
 #include "../ats/ats_sr.h"
+#include "../ats/ats_texture_table.h"
 
 #define CUTE_C2_IMPLEMENTATION
 #include "../ats/ext/cute_c2.h"
@@ -16,24 +17,29 @@
 
 #include "path_finder.h"
 
-static game_state_t game_state;
-
-static mat4_t projection      = {0};
-static mat4_t view            = {0};
-static mat4_t pvm             = {0};
-
-static u32    rs              = 0xdeadbeef;
-static vec3_t mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
+static memory_arena_t   ma              = {0};
+static game_state_t*    game_state      = NULL;
+static mat4_t           projection      = {0};
+static mat4_t           view            = {0};
+static mat4_t           pvm             = {0};
+static frustum_t        frustum         = {0};
+static u32              rs              = 0xdeadbeef;
+static vec3_t           mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 
 #include "init.c"
 #include "update.c"
 #include "render.c"
 
+static u8 memory[GB];
+
 int main(void) {
-    platform_init("Game Off 2021", 800, 600, 8);
+    ma              = ma_create(memory, ARRAY_COUNT(memory));
+    game_state      = ma_type(&ma, game_state_t);
+
+    platform_init("Game Off 2021", 1200, 800, 0);
     render_init();
 
-    game_state_t* gs = &game_state;
+    game_state_t* gs = game_state;
     init_game(gs);
 
     while (!platform.close) {

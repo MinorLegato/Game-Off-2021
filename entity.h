@@ -19,6 +19,7 @@ enum {
     AI_WORKER_EXECUTE_ORDER,
     // Guard AI:
     AI_GUARD_IDLE,
+    AI_GUARD_KILL_TARGET,
     // Ant AI:
     AI_ANT_IDLE,
     AI_ANT_AGRO,
@@ -33,6 +34,7 @@ typedef struct entity_info_t {
     f32         max_life;
     
     char        name[32];
+    char        texture[32];
 } entity_info_t;
 
 static entity_info_t entity_info_table[ENTITY_TYPE_COUNT] = {
@@ -43,22 +45,25 @@ static entity_info_t entity_info_table[ENTITY_TYPE_COUNT] = {
 
     [ENTITY_TYPE_WORKER] = {
         .name       = "worker",
+        .texture    = "human",
         .ai         = AI_WORKER_IDLE,
-        .rad        = 0.18,
+        .rad        = 0.24,
         .color      = 0xff22bb22,
         .max_life   = 1.0,
     },
 
     [ENTITY_TYPE_GUARD] = {
         .name       = "guard",
+        .texture    = "human",
         .ai         = AI_GUARD_IDLE,
-        .rad        = 0.2,
+        .rad        = 0.24,
         .color      = 0xffbb4422,
         .max_life   = 2.0,
     },
 
     [ENTITY_TYPE_ANT] = {
         .name       = "ant",
+        .texture    = "bug",
         .ai         = AI_ANT_IDLE,
         .rad        = 0.24,
         .color      = 0xff2244bb,
@@ -82,13 +87,20 @@ typedef struct entity_t {
 
     ai_type_t       ai;
 
-    union {
-        u32         target_id;
-        vec2i_t     target_pos;
-    };
+    u32             target_id;
+    vec2_t          target_pos;
 } entity_t;
 
-const entity_info_t* entity_get_info(const entity_t* e) {
+static const entity_info_t* entity_get_info(const entity_t* e) {
     return &entity_info_table[e->type];
+}
+
+static rect2_t entity_get_rect(const entity_t* e) {
+    const entity_info_t* info = entity_get_info(e);
+
+    return (rect2_t) {
+        .min = { e->pos.x - info->rad, e->pos.y - info->rad },
+        .max = { e->pos.x + info->rad, e->pos.y + info->rad },
+    };
 }
 
