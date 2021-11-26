@@ -4,12 +4,13 @@
 #include "../ats/ats_platform.h"
 #include "../ats/ats_sr.h"
 
-
 #define TEXTURE_BORDER (0.02)
 #include "../ats/ats_texture_table.h"
 
 #define CUTE_C2_IMPLEMENTATION
 #include "../ats/ext/cute_c2.h"
+
+static u32 rs = 0xdeadbeef;
 
 #include "order.h"
 #include "map.h"
@@ -26,7 +27,6 @@ static mat4_t           projection      = {0};
 static mat4_t           view            = {0};
 static mat4_t           pvm             = {0};
 static frustum_t        frustum         = {0};
-static u32              rs              = 0xdeadbeef;
 static vec3_t           mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 
 #include "init.c"

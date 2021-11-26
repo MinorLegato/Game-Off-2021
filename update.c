@@ -257,9 +257,30 @@ static void update_map(game_state_t* gs, f32 dt) {
     }
 }
 
+static void update_particles(game_state_t* gs, f32 dt) {
+    for (u32 i = 0; i < gs->particle_count; ++i) {
+        particle_t* p = &gs->particle_array[i];
+
+        p->vel.x += rand_f32(&rs, -p->turbulance, p->turbulance) * dt;
+        p->vel.y += rand_f32(&rs, -p->turbulance, p->turbulance) * dt;
+        p->vel.z += rand_f32(&rs, -p->turbulance, p->turbulance) * dt;
+
+        p->pos.x += p->vel.x * dt;
+        p->pos.y += p->vel.y * dt;
+        p->pos.z += p->vel.z * dt;
+
+        p->life -= dt;
+
+        if (p->life <= 0) {
+            gs->particle_array[i--] = gs->particle_array[--gs->particle_count];
+        }
+    }
+}
+
 static void update_game(game_state_t* gs, f32 dt) {
     update_player(gs, dt);
     update_map(gs, dt);
     update_entities(gs, dt);
+    update_particles(gs, dt);
 }
 

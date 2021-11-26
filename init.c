@@ -27,14 +27,14 @@ static void init_game(game_state_t* gs) {
     generate_map(&gs->map);
 
     for (u32 i = 0; i < 3; ++i) {
-        new_entity(gs, &(entity_desc_t) {
+        add_entity(gs, &(entity_desc_t) {
             .type   = ENTITY_TYPE_WORKER,
             .pos    = v2(0.5 * MAP_SIZE + rand_f32(&rs, -3, 3), 0.5 * MAP_SIZE + rand_f32(&rs, -3, 3)),
         });
     }
 
     for (u32 i = 0; i < 2; ++i) {
-        new_entity(gs, &(entity_desc_t) {
+        add_entity(gs, &(entity_desc_t) {
             .type   = ENTITY_TYPE_GUARD,
             .pos    = v2(0.5 * MAP_SIZE + rand_f32(&rs, -3, 3), 0.5 * MAP_SIZE + rand_f32(&rs, -3, 3)),
         });
@@ -44,7 +44,7 @@ static void init_game(game_state_t* gs) {
         vec2i_t pos = { rand_i32(&rs, 0, MAP_SIZE - 1), rand_i32(&rs, 0, MAP_SIZE - 1) };
 
         if (map_is_traversable(&gs->map, pos.x, pos.y)) {
-            new_entity(gs, &(entity_desc_t) {
+            add_entity(gs, &(entity_desc_t) {
                 .type   = ENTITY_TYPE_ANT,
                 .pos    = v2(pos.x + 0.5, pos.y + 0.5),
             });

@@ -16,7 +16,7 @@ typedef struct game_state_t {
     particle_t      particle_array[PARTICLE_MAX];
 } game_state_t;
 
-static entity_t* new_entity(game_state_t* gs, const entity_desc_t* desc) {
+static entity_t* add_entity(game_state_t* gs, const entity_desc_t* desc) {
     if (gs->entity_count >= ENTITY_MAX) return NULL;
 
     entity_t* e = &gs->entity_array[gs->entity_count++];
@@ -41,5 +41,35 @@ static entity_t* get_entity(game_state_t* gs, u32 id) {
     }
 
     return NULL;
+}
+
+static vec4_t randomize_color(vec4_t color, f32 r) {
+    if (r == 0) return color;
+
+    color.r = clamp_f32(color.r + rand_f32(&rs, -r, r), 0, 1);
+    color.g = clamp_f32(color.g + rand_f32(&rs, -r, r), 0, 1);
+    color.b = clamp_f32(color.b + rand_f32(&rs, -r, r), 0, 1);
+
+    return color;
+}
+
+static void add_particle(game_state_t* gs, const particle_desc_t* desc) {
+    u32 count = CLAMP_MIN(desc->count, 1);
+
+    for (u32 i = 0; (i < count) && (gs->particle_count < PARTICLE_MAX); ++i) {
+        particle_t* p = &gs->particle_array[gs->entity_count++];
+
+        p->pos          = v3_add(desc->pos, v3_scale(rand_unit_v3(&rs), desc->rand.pos));
+        p->vel          = v3_add(desc->vel, v3_scale(rand_unit_v3(&rs), desc->rand.vel));
+        p->rad          = desc->rad + rand_f32(&rs, -desc->rad, desc->rad);
+
+        p->turbulance   = desc->turbulance;
+
+        p->life         = desc->life;
+        p->max_life     = p->life;
+
+        p->start_color  = pack_color_v4(randomize_color(desc->start_color, desc->rand.start_color));
+        p->end_color    = pack_color_v4(randomize_color(desc->end_color, desc->rand.end_color));
+    }
 }
 

@@ -77,9 +77,9 @@ static void render_map(game_state_t* gs) {
     }
 
     // render grid:
-#if 0
+#if 1
     defer(sr_begin(GL_LINES, sr_basic_shader), sr_end()) {
-        sr_color(0x77000000);
+        sr_color(0x33000000);
 
         for (i32 i = 0; i < MAP_SIZE; ++i) {
             sr_vertex(0,        i,          0.01);
@@ -136,12 +136,11 @@ static void render_game(game_state_t* gs) {
 
     {
         add_light(&(light_t) {
-            .pos        = v3(cam->pos.x, cam->pos.y, 4.0),
-            .range      = 32,
-            .value      = 0.4,
-            .color      = pack_color_f32(1, 0.8, 0.4, 1),
+            .pos    = v3(cam->pos.x, cam->pos.y, 4.0),
+            .range  = 32,
+            .value  = 0.4,
+            .color  = pack_color_f32(1, 0.8, 0.4, 1),
         });
-
 
         render_map(gs);
         render_entities(gs);
@@ -155,15 +154,17 @@ static void render_game(game_state_t* gs) {
         pos.x = floorf(pos.x);
         pos.y = floorf(pos.y);
 
+        f32 z = 0;
+
         sr_color(0x33ffffff);
 
-        sr_vertex(pos.x - 0, pos.y - 0, 0.021);
-        sr_vertex(pos.x + 1, pos.y - 0, 0.021);
-        sr_vertex(pos.x + 1, pos.y + 1, 0.021);
+        sr_vertex(pos.x - 0, pos.y - 0, z + 0.021);
+        sr_vertex(pos.x + 1, pos.y - 0, z + 0.021);
+        sr_vertex(pos.x + 1, pos.y + 1, z + 0.021);
 
-        sr_vertex(pos.x + 1, pos.y + 1, 0.021);
-        sr_vertex(pos.x - 0, pos.y + 1, 0.021);
-        sr_vertex(pos.x - 0, pos.y - 0, 0.021);
+        sr_vertex(pos.x + 1, pos.y + 1, z + 0.021);
+        sr_vertex(pos.x - 0, pos.y + 1, z + 0.021);
+        sr_vertex(pos.x - 0, pos.y - 0, z + 0.021);
     }
 
     defer(sr_begin(GL_TRIANGLES, sr_ui_text_shader), sr_end()) {
