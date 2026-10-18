@@ -36,34 +36,34 @@ static vec3_t           mouse_position  = { 0.5 * MAP_SIZE, 0.5 * MAP_SIZE };
 static u8 memory[GB];
 
 int main(void) {
-    ma              = ma_create(memory, ARRAY_COUNT(memory));
-    game_state      = ma_type(&ma, game_state_t);
+   ma = ma_create(memory, ARRAY_COUNT(memory));
+   game_state = ma_type(&ma, game_state_t);
 
-    platform_init("Game Off 2021", 1200, 800, 0);
-    render_init();
+   platform_init("Game Off 2021", 1200, 800, 0);
+   render_init();
 
-    game_state_t* gs = game_state;
-    init_game(gs);
+   game_state_t* gs = game_state;
+   init_game(gs);
 
-    while (!platform.close) {
-        f32 dt = platform.time.delta;
+   while (!platform.close) {
+      f32 dt = platform.time.delta;
 
-        if (platform.keyboard.pressed[KEY_ESCAPE])  { platform.close = true; }
-        if (platform.keyboard.pressed[KEY_F1])      { platform.fullscreen = !platform.fullscreen; }
+      if (platform.keyboard.pressed[KEY_ESCAPE])  { platform.close = true; }
+      if (platform.keyboard.pressed[KEY_F1])      { platform.fullscreen = !platform.fullscreen; }
 
-        if (platform.keyboard.pressed[KEY_T]) {
-            printf("%u\n", gs->order_tool);
-        }
+      if (platform.keyboard.pressed[KEY_T]) {
+         printf("%u\n", gs->order_tool);
+      }
 
-        update_game(gs, dt);
+      update_game(gs, dt);
 
-        defer (sr_begin_frame(), sr_end_frame()) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            render_game(gs);
-        }
+      defer (sr_begin_frame(), sr_end_frame()) {
+         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+         render_game(gs);
+      }
 
-        mouse_position = gl_get_world_position(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);
-        platform_update();
-    }
+      mouse_position = gl_get_world_position(platform.mouse.pos.x, platform.mouse.pos.y, projection, view);
+      platform_update();
+   }
 }
 
